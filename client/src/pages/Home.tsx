@@ -2628,7 +2628,10 @@ export default function Home() {
         open={Boolean(selectedRecord)}
         onOpenChange={open => !open && setSelectedRecord(null)}
       >
-        <DialogContent className="max-h-[90vh] max-w-[1100px] overflow-y-auto bg-[#f5f6f2] p-5 md:p-7">
+        <DialogContent
+          style={{ inset: 0, left: 0, top: 0, transform: "none", width: "100vw", height: "100vh", maxWidth: "none", maxHeight: "none" }}
+          className="fixed rounded-none border-0 bg-[#f5f6f2] p-0 overflow-y-auto"
+        >
           <DialogHeader className="border-b border-[#dce5de] pb-4 pr-8">
             <p className="text-xs uppercase tracking-[0.16em] text-[#4f8f77] font-semibold">
               Detalhes completos do registro
