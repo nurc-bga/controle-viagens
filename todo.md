@@ -22,4 +22,6 @@
 - [x] Consolidar variações de nomes nas duas fontes de dados
 - [x] Tornar menus de filtro opacos e ordenar opções em pt-BR
 - [x] Auditar e consolidar variações de nomes semelhantes, incluindo Adjailto/Adjailton
+- [x] Trocar símbolo por veículo frontal minimalista em duas cores
+- [x] Consolidar os 14 grupos de motoristas informados pelo usuário
 - [x] Validar importação, build e testes
