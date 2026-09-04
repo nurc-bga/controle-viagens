@@ -12,4 +12,6 @@
 - [x] Abrir histórico de veículos em tela cheia
 - [x] Adicionar edição administrativa de membros
 - [x] Adicionar exclusão administrativa protegida de membros
+- [x] Depurar o fluxo público de autenticação e diferenciar login de acesso visitante
+- [x] Exibir acesso visitante como opção na tela inicial quando liberado
 - [x] Validar importação, build e testes
