@@ -115,6 +115,25 @@ export async function getUserById(id: number) {
   return result[0];
 }
 
+export async function getUserByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(users).where(eq(users.email, email.toLowerCase())).limit(1);
+  return result[0];
+}
+
+export async function setUserPassword(id: number, passwordHash: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Banco de dados indisponível");
+  await db.update(users).set({ passwordHash }).where(eq(users.id, id));
+}
+
+export async function markUserSignedIn(id: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, id));
+}
+
 export async function updateUserById(id: number, data: { name: string; email: string; role: "user" | "admin" }, openId?: string) {
   const db = await getDb();
   if (!db) throw new Error("Banco de dados indisponível");

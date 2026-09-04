@@ -14,4 +14,5 @@
 - [x] Adicionar exclusão administrativa protegida de membros
 - [x] Depurar o fluxo público de autenticação e diferenciar login de acesso visitante
 - [x] Exibir acesso visitante como opção na tela inicial quando liberado
+- [x] Configurar ademirmaciel01@gmail.com para login Google sem senha
 - [x] Validar importação, build e testes

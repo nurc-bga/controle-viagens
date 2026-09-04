@@ -3,9 +3,10 @@ import { createHash } from "node:crypto";
 import { z } from "zod";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
+import { createPasswordSession, hashPassword, PASSWORD_SESSION_COOKIE, verifyPassword } from "./passwordAuth";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { deleteUserById, getUserById, getVisitorAccess, importTrips, listDepartureArrivalRecords, listTrips, listUsers, listVehicles, setVisitorAccess, updateUserById, upsertUser } from "./db";
+import { deleteUserById, getUserByEmail, getUserById, getVisitorAccess, importTrips, listDepartureArrivalRecords, listTrips, listUsers, listVehicles, markUserSignedIn, setUserPassword, setVisitorAccess, updateUserById, upsertUser } from "./db";
 import type { InsertTrip } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -67,11 +68,27 @@ export const appRouter = router({
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
+    passwordLogin: publicProcedure.input(z.object({ email: z.string().email(), password: z.string().min(8) })).mutation(async ({ ctx, input }) => {
+      const user = await getUserByEmail(input.email);
+      if (!user?.passwordHash || !verifyPassword(input.password, user.passwordHash)) {
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "E-mail ou senha inválidos." });
+      }
+      const cookieOptions = getSessionCookieOptions(ctx.req);
+      ctx.res.cookie(PASSWORD_SESSION_COOKIE, createPasswordSession(user.id), { ...cookieOptions, maxAge: 30 * 24 * 60 * 60 * 1000 });
+      await markUserSignedIn(user.id);
+      return { success: true } as const;
+    }),
+    passwordLogout: publicProcedure.mutation(({ ctx }) => {
+      const cookieOptions = getSessionCookieOptions(ctx.req);
+      ctx.res.clearCookie(PASSWORD_SESSION_COOKIE, { ...cookieOptions, maxAge: -1 });
+      return { success: true } as const;
+    }),
     visitorAccess: publicProcedure.query(() => getVisitorAccess()),
     setVisitorAccess: adminProcedure.input(z.object({ enabled: z.boolean() })).mutation(({ input }) => setVisitorAccess(input.enabled)),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+      ctx.res.clearCookie(PASSWORD_SESSION_COOKIE, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
     }),
   }),
@@ -132,6 +149,11 @@ export const appRouter = router({
       if (member.id === ctx.user.id) throw new TRPCError({ code: "FORBIDDEN", message: "Não é permitido excluir a própria conta." });
       if (member.openId === ENV.ownerOpenId) throw new TRPCError({ code: "FORBIDDEN", message: "A conta proprietária não pode ser excluída." });
       await deleteUserById(input.id);
+      return { success: true } as const;
+    }),
+    resetPassword: adminProcedure.input(z.object({ id: z.number().int().positive(), password: z.string().min(8) })).mutation(async ({ input }) => {
+      if (!(await getUserById(input.id))) throw new TRPCError({ code: "NOT_FOUND", message: "Membro não encontrado." });
+      await setUserPassword(input.id, hashPassword(input.password));
       return { success: true } as const;
     }),
   }),
