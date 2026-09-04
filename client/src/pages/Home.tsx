@@ -2630,7 +2630,7 @@ export default function Home() {
       >
         <DialogContent
           style={{ inset: 0, left: 0, top: 0, transform: "none", width: "100vw", height: "100vh", maxWidth: "none", maxHeight: "none" }}
-          className="fixed rounded-none border-0 bg-[#f5f6f2] p-0 overflow-y-auto"
+          className="!fixed !inset-0 !left-0 !top-0 !z-[60] !m-0 !h-screen !w-screen !max-h-none !max-w-none !translate-x-0 !translate-y-0 rounded-none border-0 bg-[#f5f6f2] p-0 overflow-y-auto"
         >
           <DialogHeader className="border-b border-[#dce5de] pb-4 pr-8">
             <p className="text-xs uppercase tracking-[0.16em] text-[#4f8f77] font-semibold">
