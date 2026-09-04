@@ -4,22 +4,60 @@ import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import {
-  Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart,
-  ResponsiveContainer, Tooltip, XAxis, YAxis,
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
 import {
-  BarChart3, CalendarDays, CarFront, ChevronDown, Pencil,
-  ClipboardList, Filter, Gauge, LayoutDashboard,
-  LogOut, MapPin, Menu, Printer, Search, ShieldCheck, Truck, UserPlus,
-  Users, X, Trash2, Power,
+  BarChart3,
+  CalendarDays,
+  CarFront,
+  ChevronDown,
+  Pencil,
+  ClipboardList,
+  Filter,
+  Gauge,
+  LayoutDashboard,
+  LogOut,
+  MapPin,
+  Menu,
+  Printer,
+  Search,
+  ShieldCheck,
+  Truck,
+  UserPlus,
+  Users,
+  X,
+  Trash2,
+  Power,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const COLORS = ["#e4684d", "#4f8f77", "#e5b74f"];
 const DATE_MIN = "2022-05-01";
@@ -27,167 +65,2645 @@ const DATE_MAX = "2026-08-31";
 
 type Tab = "gráficos" | "viagens" | "veículos" | "registros" | "equipe";
 type Trip = {
-  id: number; tripDate: string | Date; vehiclePlate: string; vehicleModel?: string | null;
-  driverName: string; origin?: string | null; destination?: string | null;
-  purpose?: string | null; distanceKm: number; durationMinutes: number;
-  status: "Concluída" | "Em andamento" | "Cancelada"; notes?: string | null; sourceSheet?: string | null;
+  id: number;
+  tripDate: string | Date;
+  vehiclePlate: string;
+  vehicleModel?: string | null;
+  driverName: string;
+  origin?: string | null;
+  destination?: string | null;
+  purpose?: string | null;
+  distanceKm: number;
+  durationMinutes: number;
+  status: "Concluída" | "Em andamento" | "Cancelada";
+  notes?: string | null;
+  sourceSheet?: string | null;
 };
 type RecordRow = {
-  id: number; recordedAt: string | Date; respondentName?: string | null; employeeId?: string | null;
-  vehiclePlate: string; event?: string | null; kmInitial: number; kmFinal: number;
-  serviceType?: string | null; summary?: string | null; fuelLevel?: string | null;
-  vehicleCondition?: string | null; irregularity?: string | null; email?: string | null; declaration?: string | null;
+  id: number;
+  recordedAt: string | Date;
+  respondentName?: string | null;
+  employeeId?: string | null;
+  vehiclePlate: string;
+  event?: string | null;
+  kmInitial: number;
+  kmFinal: number;
+  serviceType?: string | null;
+  summary?: string | null;
+  fuelLevel?: string | null;
+  vehicleCondition?: string | null;
+  irregularity?: string | null;
+  email?: string | null;
+  declaration?: string | null;
+  importedFile?: string | null;
+  createdAt?: string | Date | null;
 };
-type ConsolidatedRecord = RecordRow & { arrival?: RecordRow; recordMode: "paired" | "departure" | "arrival" };
-type Vehicle = { id: number; plate: string; model?: string | null; category?: string | null; year?: number | null };
-type TeamMember = { id: number; name?: string | null; email?: string | null; role: "admin" | "user"; active: number; lastSignedIn?: string | Date | null; createdAt?: string | Date | null };
+type ConsolidatedRecord = RecordRow & {
+  arrival?: RecordRow;
+  originalEvent?: string | null;
+  recordMode: "paired" | "departure" | "arrival";
+};
+type Vehicle = {
+  id: number;
+  plate: string;
+  model?: string | null;
+  category?: string | null;
+  year?: number | null;
+};
+type TeamMember = {
+  id: number;
+  name?: string | null;
+  email?: string | null;
+  role: "admin" | "user";
+  active: number;
+  lastSignedIn?: string | Date | null;
+  createdAt?: string | Date | null;
+};
 type SortState = { key: string; direction: "asc" | "desc" };
 
 const DEMO_TRIPS: Trip[] = [
-  { id: -1, tripDate: "2026-08-28", vehiclePlate: "GXR-4H20", vehicleModel: "Fiat Toro", driverName: "Mariana Costa", origin: "São Paulo, SP", destination: "Campinas, SP", purpose: "Visita técnica", distanceKm: 96, durationMinutes: 118, status: "Concluída" },
-  { id: -2, tripDate: "2026-08-21", vehiclePlate: "QWE-9B31", vehicleModel: "Toyota Corolla", driverName: "Rafael Mendes", origin: "Santos, SP", destination: "São Paulo, SP", purpose: "Reunião com cliente", distanceKm: 142, durationMinutes: 164, status: "Concluída" },
-  { id: -3, tripDate: "2026-08-14", vehiclePlate: "GXR-4H20", vehicleModel: "Fiat Toro", driverName: "Mariana Costa", origin: "Campinas, SP", destination: "Jundiaí, SP", purpose: "Entrega de equipamentos", distanceKm: 82, durationMinutes: 76, status: "Concluída" },
+  {
+    id: -1,
+    tripDate: "2026-08-28",
+    vehiclePlate: "GXR-4H20",
+    vehicleModel: "Fiat Toro",
+    driverName: "Mariana Costa",
+    origin: "São Paulo, SP",
+    destination: "Campinas, SP",
+    purpose: "Visita técnica",
+    distanceKm: 96,
+    durationMinutes: 118,
+    status: "Concluída",
+  },
+  {
+    id: -2,
+    tripDate: "2026-08-21",
+    vehiclePlate: "QWE-9B31",
+    vehicleModel: "Toyota Corolla",
+    driverName: "Rafael Mendes",
+    origin: "Santos, SP",
+    destination: "São Paulo, SP",
+    purpose: "Reunião com cliente",
+    distanceKm: 142,
+    durationMinutes: 164,
+    status: "Concluída",
+  },
+  {
+    id: -3,
+    tripDate: "2026-08-14",
+    vehiclePlate: "GXR-4H20",
+    vehicleModel: "Fiat Toro",
+    driverName: "Mariana Costa",
+    origin: "Campinas, SP",
+    destination: "Jundiaí, SP",
+    purpose: "Entrega de equipamentos",
+    distanceKm: 82,
+    durationMinutes: 76,
+    status: "Concluída",
+  },
 ];
 
-function alphaSort(values: string[]) { return [...values].sort((a, b) => a.localeCompare(b, "pt-BR", { sensitivity: "base", numeric: true })); }
+function alphaSort(values: string[]) {
+  return [...values].sort((a, b) =>
+    a.localeCompare(b, "pt-BR", { sensitivity: "base", numeric: true })
+  );
+}
 function formatDate(value: string | Date | null | undefined) {
   if (!value) return "—";
-  return new Date(value).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" }).replace(" de ", " ");
+  return new Date(value)
+    .toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    })
+    .replace(" de ", " ");
 }
 function formatDateTime(value: string | Date | null | undefined) {
   if (!value) return "Nunca";
-  return new Date(value).toLocaleString("pt-BR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  return new Date(value).toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
-function initials(name?: string | null) { return (name || "U").split(" ").slice(0, 2).map(part => part[0]).join("").toUpperCase(); }
-function monthKey(value: string | Date) { const date = new Date(value); return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`; }
-function monthLabel(key: string) { const [year, month] = key.split("-").map(Number); return new Date(year, month - 1, 1).toLocaleDateString("pt-BR", { month: "short", year: "2-digit" }).replace(" de ", " "); }
-function statusClass(status: Trip["status"]) { return status === "Concluída" ? "bg-[#e8f3ec] text-[#317154]" : status === "Em andamento" ? "bg-[#fff4d8] text-[#97721b]" : "bg-[#fce8e4] text-[#b54e3c]"; }
-function dateWithin(value: string | Date, from: string, to: string) { const date = new Date(value).getTime(); return date >= new Date(`${from}T00:00:00`).getTime() && date <= new Date(`${to}T23:59:59`).getTime(); }
-function normalizedRecordValue(value?: string | null) { return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, ""); }
+function initials(name?: string | null) {
+  return (name || "U")
+    .split(" ")
+    .slice(0, 2)
+    .map(part => part[0])
+    .join("")
+    .toUpperCase();
+}
+function monthKey(value: string | Date) {
+  const date = new Date(value);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+function monthLabel(key: string) {
+  const [year, month] = key.split("-").map(Number);
+  return new Date(year, month - 1, 1)
+    .toLocaleDateString("pt-BR", { month: "short", year: "2-digit" })
+    .replace(" de ", " ");
+}
+function statusClass(status: Trip["status"]) {
+  return status === "Concluída"
+    ? "bg-[#e8f3ec] text-[#317154]"
+    : status === "Em andamento"
+      ? "bg-[#fff4d8] text-[#97721b]"
+      : "bg-[#fce8e4] text-[#b54e3c]";
+}
+function dateWithin(value: string | Date, from: string, to: string) {
+  const date = new Date(value).getTime();
+  return (
+    date >= new Date(`${from}T00:00:00`).getTime() &&
+    date <= new Date(`${to}T23:59:59`).getTime()
+  );
+}
+function normalizedRecordValue(value?: string | null) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "");
+}
 function recordsShareIdentity(a: RecordRow, b: RecordRow) {
-  return Boolean((a.employeeId && b.employeeId && normalizedRecordValue(a.employeeId) === normalizedRecordValue(b.employeeId)) || (a.respondentName && b.respondentName && normalizedRecordValue(a.respondentName) === normalizedRecordValue(b.respondentName)) || (a.email && b.email && normalizedRecordValue(a.email) === normalizedRecordValue(b.email)));
+  return Boolean(
+    (a.employeeId &&
+      b.employeeId &&
+      normalizedRecordValue(a.employeeId) ===
+        normalizedRecordValue(b.employeeId)) ||
+      (a.respondentName &&
+        b.respondentName &&
+        normalizedRecordValue(a.respondentName) ===
+          normalizedRecordValue(b.respondentName)) ||
+      (a.email &&
+        b.email &&
+        normalizedRecordValue(a.email) === normalizedRecordValue(b.email))
+  );
 }
 function consolidateRecords(records: RecordRow[]): ConsolidatedRecord[] {
-  const ordered = [...records].sort((a, b) => new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime() || a.id - b.id);
-  const open = new Map<string, RecordRow[]>(); const result: ConsolidatedRecord[] = [];
+  const ordered = [...records].sort(
+    (a, b) =>
+      new Date(a.recordedAt).getTime() - new Date(b.recordedAt).getTime() ||
+      a.id - b.id
+  );
+  const open = new Map<string, RecordRow[]>();
+  const result: ConsolidatedRecord[] = [];
   for (const record of ordered) {
     const isDeparture = normalizedRecordValue(record.event).includes("saida");
     const queue = open.get(record.vehiclePlate) || [];
-    if (isDeparture) { queue.push(record); open.set(record.vehiclePlate, queue); continue; }
-    const arrivalTime = new Date(record.recordedAt).getTime(); let bestIndex = -1; let bestScore = -1;
+    if (isDeparture) {
+      queue.push(record);
+      open.set(record.vehiclePlate, queue);
+      continue;
+    }
+    const arrivalTime = new Date(record.recordedAt).getTime();
+    let bestIndex = -1;
+    let bestScore = -1;
     queue.forEach((departure, index) => {
       const gap = arrivalTime - new Date(departure.recordedAt).getTime();
-      if (gap < 0 || gap > 7 * 24 * 60 * 60 * 1000 || (gap > 24 * 60 * 60 * 1000 && !recordsShareIdentity(departure, record))) return;
-      const score = (recordsShareIdentity(departure, record) ? 1_000_000_000_000 : 0) + new Date(departure.recordedAt).getTime();
-      if (score > bestScore) { bestIndex = index; bestScore = score; }
+      if (
+        gap < 0 ||
+        gap > 7 * 24 * 60 * 60 * 1000 ||
+        (gap > 24 * 60 * 60 * 1000 && !recordsShareIdentity(departure, record))
+      )
+        return;
+      const score =
+        (recordsShareIdentity(departure, record) ? 1_000_000_000_000 : 0) +
+        new Date(departure.recordedAt).getTime();
+      if (score > bestScore) {
+        bestIndex = index;
+        bestScore = score;
+      }
     });
-    if (bestIndex >= 0) { const departure = queue.splice(bestIndex, 1)[0]; result.push({ ...departure, event: "SAÍDA + CHEGADA", arrival: record, recordMode: "paired" }); }
-    else result.push({ ...record, event: "CHEGADA (sem saída)", recordMode: "arrival" });
+    if (bestIndex >= 0) {
+      const departure = queue.splice(bestIndex, 1)[0];
+      result.push({
+        ...departure,
+        event: "SAÍDA + CHEGADA",
+        originalEvent: departure.event,
+        arrival: record,
+        recordMode: "paired",
+      });
+    } else
+      result.push({
+        ...record,
+        event: "CHEGADA (sem saída)",
+        originalEvent: record.event,
+        recordMode: "arrival",
+      });
     open.set(record.vehiclePlate, queue);
   }
-  for (const queue of Array.from(open.values())) for (const departure of queue) result.push({ ...departure, event: "SAÍDA (sem chegada)", recordMode: "departure" });
+  for (const queue of Array.from(open.values()))
+    for (const departure of queue)
+      result.push({
+        ...departure,
+        event: "SAÍDA (sem chegada)",
+        originalEvent: departure.event,
+        recordMode: "departure",
+      });
   return result;
 }
-function compareSortValues(a: unknown, b: unknown, direction: SortState["direction"]) {
+function compareSortValues(
+  a: unknown,
+  b: unknown,
+  direction: SortState["direction"]
+) {
   let result = 0;
   if (typeof a === "number" && typeof b === "number") result = a - b;
   else {
-    const left = String(a ?? "").toLocaleLowerCase("pt-BR"); const right = String(b ?? "").toLocaleLowerCase("pt-BR");
-    const leftDate = Date.parse(left); const rightDate = Date.parse(right);
-    if (leftDate && rightDate && (left.includes("-") || left.includes("/") || left.includes(":"))) result = leftDate - rightDate;
-    else result = left.localeCompare(right, "pt-BR", { numeric: true, sensitivity: "base" });
+    const left = String(a ?? "").toLocaleLowerCase("pt-BR");
+    const right = String(b ?? "").toLocaleLowerCase("pt-BR");
+    const leftDate = Date.parse(left);
+    const rightDate = Date.parse(right);
+    if (
+      leftDate &&
+      rightDate &&
+      (left.includes("-") || left.includes("/") || left.includes(":"))
+    )
+      result = leftDate - rightDate;
+    else
+      result = left.localeCompare(right, "pt-BR", {
+        numeric: true,
+        sensitivity: "base",
+      });
   }
   return direction === "asc" ? result : -result;
 }
-function nextSort(current: SortState, key: string): SortState { return current.key === key ? { key, direction: current.direction === "asc" ? "desc" : "asc" } : { key, direction: key === "tripDate" || key === "recordedAt" ? "desc" : "asc" }; }
-function SortHeader({ label, sortKey, sort, onSort }: { label: string; sortKey: string; sort: SortState; onSort: (key: string) => void }) {
+function nextSort(current: SortState, key: string): SortState {
+  return current.key === key
+    ? { key, direction: current.direction === "asc" ? "desc" : "asc" }
+    : {
+        key,
+        direction: key === "tripDate" || key === "recordedAt" ? "desc" : "asc",
+      };
+}
+function SortHeader({
+  label,
+  sortKey,
+  sort,
+  onSort,
+}: {
+  label: string;
+  sortKey: string;
+  sort: SortState;
+  onSort: (key: string) => void;
+}) {
   const active = sort.key === sortKey;
-  return <th className="px-4 py-3 text-[10px] uppercase tracking-[0.12em] text-[#75827f] font-bold whitespace-nowrap"><button type="button" onClick={() => onSort(sortKey)} className={`inline-flex items-center gap-1 hover:text-[#14283f] ${active ? "text-[#4f8f77]" : ""}`}>{label}<span aria-hidden="true">{active ? (sort.direction === "asc" ? "↑" : "↓") : "↕"}</span></button></th>;
+  return (
+    <th className="px-4 py-3 text-[10px] uppercase tracking-[0.12em] text-[#75827f] font-bold whitespace-nowrap">
+      <button
+        type="button"
+        onClick={() => onSort(sortKey)}
+        className={`inline-flex items-center gap-1 hover:text-[#14283f] ${active ? "text-[#4f8f77]" : ""}`}
+      >
+        {label}
+        <span aria-hidden="true">
+          {active ? (sort.direction === "asc" ? "↑" : "↓") : "↕"}
+        </span>
+      </button>
+    </th>
+  );
+}
+function truncateText(value: unknown, maxLength = 42) {
+  const text = String(value ?? "").trim();
+  if (!text) return "—";
+  return text.length > maxLength
+    ? `${text.slice(0, maxLength - 1).trimEnd()}…`
+    : text;
+}
+function recordValue(value: unknown) {
+  if (value === null || value === undefined || String(value).trim() === "")
+    return "—";
+  return String(value);
+}
+function RecordDetailField({
+  label,
+  value,
+}: {
+  label: string;
+  value: unknown;
+}) {
+  return (
+    <div className="min-w-0 rounded-xl bg-[#f7f9f6] px-3 py-2.5">
+      <dt className="text-[10px] uppercase tracking-[0.1em] text-[#75827f] font-semibold">
+        {label}
+      </dt>
+      <dd className="mt-1 text-sm text-[#14283f] whitespace-pre-wrap break-words">
+        {recordValue(value)}
+      </dd>
+    </div>
+  );
+}
+function RecordDetailSection({
+  title,
+  record,
+  eventLabel,
+}: {
+  title: string;
+  record: RecordRow;
+  eventLabel?: string | null;
+}) {
+  return (
+    <section className="rounded-2xl border border-[#e1e8e2] bg-white p-4 md:p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <h3 className="font-display text-lg font-bold text-[#14283f]">
+          {title}
+        </h3>
+        <span className="rounded-full bg-[#e8f3ec] px-2.5 py-1 text-[11px] font-semibold text-[#317154]">
+          Registro #{record.id}
+        </span>
+      </div>
+      <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <RecordDetailField
+          label="Data e hora"
+          value={formatDateTime(record.recordedAt)}
+        />
+        <RecordDetailField
+          label="Evento original"
+          value={eventLabel || record.event}
+        />
+        <RecordDetailField label="Veículo" value={record.vehiclePlate} />
+        <RecordDetailField label="Matrícula" value={record.employeeId} />
+        <RecordDetailField label="Responsável" value={record.respondentName} />
+        <RecordDetailField
+          label="Quilometragem inicial"
+          value={record.kmInitial}
+        />
+        <RecordDetailField label="Quilometragem final" value={record.kmFinal} />
+        <RecordDetailField label="Atendimento" value={record.serviceType} />
+        <RecordDetailField label="Resumo" value={record.summary} />
+        <RecordDetailField
+          label="Nível de combustível"
+          value={record.fuelLevel}
+        />
+        <RecordDetailField
+          label="Condição do veículo"
+          value={record.vehicleCondition}
+        />
+        <RecordDetailField label="Irregularidade" value={record.irregularity} />
+        <RecordDetailField label="E-mail" value={record.email} />
+        <RecordDetailField label="Declaração" value={record.declaration} />
+        <RecordDetailField
+          label="Ficheiro importado"
+          value={record.importedFile}
+        />
+        <RecordDetailField
+          label="Criado em"
+          value={formatDateTime(record.createdAt)}
+        />
+      </dl>
+    </section>
+  );
 }
 
-function StatCard({ label, value, detail, icon: Icon, accent }: { label: string; value: string; detail: string; icon: React.ElementType; accent: string }) {
-  return <Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)] bg-white overflow-hidden"><CardContent className="p-5 relative"><div className={`absolute right-0 top-0 h-full w-1 ${accent}`} /><div className="flex items-start justify-between"><div><p className="text-[11px] uppercase tracking-[0.16em] text-[#75827f] font-semibold">{label}</p><p className="font-display text-3xl font-bold text-[#14283f] mt-2">{value}</p><p className="text-xs text-[#75827f] mt-2">{detail}</p></div><div className="h-10 w-10 rounded-xl bg-[#f1f5f1] flex items-center justify-center text-[#4f8f77]"><Icon className="h-5 w-5" /></div></div></CardContent></Card>;
+function StatCard({
+  label,
+  value,
+  detail,
+  icon: Icon,
+  accent,
+}: {
+  label: string;
+  value: string;
+  detail: string;
+  icon: React.ElementType;
+  accent: string;
+}) {
+  return (
+    <Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)] bg-white overflow-hidden">
+      <CardContent className="p-5 relative">
+        <div className={`absolute right-0 top-0 h-full w-1 ${accent}`} />
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-[11px] uppercase tracking-[0.16em] text-[#75827f] font-semibold">
+              {label}
+            </p>
+            <p className="font-display text-3xl font-bold text-[#14283f] mt-2">
+              {value}
+            </p>
+            <p className="text-xs text-[#75827f] mt-2">{detail}</p>
+          </div>
+          <div className="h-10 w-10 rounded-xl bg-[#f1f5f1] flex items-center justify-center text-[#4f8f77]">
+            <Icon className="h-5 w-5" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }
-function VehicleMark({ className = "h-6 w-6" }: { className?: string }) { return <img src="/manus-storage/LogoCarroApp_3fa6ce03.png" alt="" aria-hidden="true" className={`${className} object-cover`} />; }
-
-function FilterBar({ trips, from, to, setFrom, setTo, vehicle, setVehicle, driver, setDriver, status, setStatus, destination, setDestination, onClear }: { trips: Trip[]; from: string; to: string; setFrom: (v: string) => void; setTo: (v: string) => void; vehicle: string; setVehicle: (v: string) => void; driver: string; setDriver: (v: string) => void; status: string; setStatus: (v: string) => void; destination: string; setDestination: (v: string) => void; onClear: () => void }) {
-  const vehicles = alphaSort(Array.from(new Set(trips.map(t => t.vehiclePlate).filter(Boolean))) as string[]);
-  const drivers = alphaSort(Array.from(new Set(trips.map(t => t.driverName).filter(Boolean))) as string[]);
-  const destinations = alphaSort(Array.from(new Set(trips.map(t => t.destination).filter(Boolean))) as string[]) as string[];
-  return <div className="no-print flex flex-wrap items-end gap-3 rounded-2xl bg-white border border-[#e3e9e4] p-4 shadow-[0_5px_18px_rgba(20,40,63,0.04)]"><div className="flex items-center gap-2 text-[#4f8f77] self-center mr-1"><Filter className="h-4 w-4" /><span className="text-xs font-semibold uppercase tracking-[0.12em]">Filtros</span></div><label className="grid gap-1 text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">De<input type="date" min={DATE_MIN} max={DATE_MAX} value={from} onChange={e => setFrom(e.target.value)} className="h-9 rounded-lg border border-[#dce5de] bg-[#fbfcfa] px-2 text-sm font-normal normal-case tracking-normal text-[#14283f]" /></label><label className="grid gap-1 text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">Até<input type="date" min={DATE_MIN} max={DATE_MAX} value={to} onChange={e => setTo(e.target.value)} className="h-9 rounded-lg border border-[#dce5de] bg-[#fbfcfa] px-2 text-sm font-normal normal-case tracking-normal text-[#14283f]" /></label><label className="grid gap-1 min-w-[145px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">Veículo<Select value={vehicle} onValueChange={setVehicle}><SelectTrigger className="h-9 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal"><SelectValue placeholder="Todos" /></SelectTrigger><SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50"><SelectItem value="todos">Todos</SelectItem>{vehicles.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}</SelectContent></Select></label><label className="grid gap-1 min-w-[165px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">Motorista<Select value={driver} onValueChange={setDriver}><SelectTrigger className="h-9 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal"><SelectValue placeholder="Todos" /></SelectTrigger><SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50"><SelectItem value="todos">Todos</SelectItem>{drivers.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}</SelectContent></Select></label><label className="grid gap-1 min-w-[145px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">Status<Select value={status} onValueChange={setStatus}><SelectTrigger className="h-9 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal"><SelectValue placeholder="Todos" /></SelectTrigger><SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50"><SelectItem value="todos">Todos</SelectItem><SelectItem value="Concluída">Concluída</SelectItem><SelectItem value="Em andamento">Em andamento</SelectItem><SelectItem value="Cancelada">Cancelada</SelectItem></SelectContent></Select></label><label className="grid gap-1 min-w-[165px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">Destino<Select value={destination} onValueChange={setDestination}><SelectTrigger className="h-9 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal"><SelectValue placeholder="Todos" /></SelectTrigger><SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50"><SelectItem value="todos">Todos</SelectItem>{destinations.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}</SelectContent></Select></label><Button variant="ghost" size="sm" onClick={onClear} className="h-9 text-[#75827f] hover:text-[#e4684d]">Limpar</Button></div>;
+function VehicleMark({ className = "h-6 w-6" }: { className?: string }) {
+  return (
+    <img
+      src="/manus-storage/LogoCarroApp_3fa6ce03.png"
+      alt=""
+      aria-hidden="true"
+      className={`${className} object-cover`}
+    />
+  );
 }
 
-function RecordsFilterBar({ records, from, to, setFrom, setTo, vehicle, setVehicle, event, setEvent, search, setSearch, onClear }: { records: RecordRow[]; from: string; to: string; setFrom: (v: string) => void; setTo: (v: string) => void; vehicle: string; setVehicle: (v: string) => void; event: string; setEvent: (v: string) => void; search: string; setSearch: (v: string) => void; onClear: () => void }) {
-  const vehicles = alphaSort(Array.from(new Set(records.map(r => r.vehiclePlate).filter(Boolean))) as string[]);
-  const events = alphaSort(Array.from(new Set(records.map(r => r.event).filter(Boolean))) as string[]) as string[];
-  return <div className="no-print flex flex-wrap items-end gap-3 rounded-2xl bg-white border border-[#e3e9e4] p-4 shadow-[0_5px_18px_rgba(20,40,63,0.04)]"><div className="flex items-center gap-2 text-[#4f8f77] self-center mr-1"><Filter className="h-4 w-4" /><span className="text-xs font-semibold uppercase tracking-[0.12em]">Filtros</span></div><label className="grid gap-1 text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">De<input type="date" min={DATE_MIN} max={DATE_MAX} value={from} onChange={e => setFrom(e.target.value)} className="h-9 rounded-lg border border-[#dce5de] bg-[#fbfcfa] px-2 text-sm font-normal normal-case tracking-normal text-[#14283f]" /></label><label className="grid gap-1 text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">Até<input type="date" min={DATE_MIN} max={DATE_MAX} value={to} onChange={e => setTo(e.target.value)} className="h-9 rounded-lg border border-[#dce5de] bg-[#fbfcfa] px-2 text-sm font-normal normal-case tracking-normal text-[#14283f]" /></label><label className="grid gap-1 min-w-[170px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">Veículo<Select value={vehicle} onValueChange={setVehicle}><SelectTrigger className="h-9 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal"><SelectValue placeholder="Todos" /></SelectTrigger><SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50"><SelectItem value="todos">Todos</SelectItem>{vehicles.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}</SelectContent></Select></label><label className="grid gap-1 min-w-[210px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">Evento<Select value={event} onValueChange={setEvent}><SelectTrigger className="h-9 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal"><SelectValue placeholder="Todos" /></SelectTrigger><SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50"><SelectItem value="todos">Todos</SelectItem>{events.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}</SelectContent></Select></label><label className="grid gap-1 min-w-[220px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">Buscar<Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Nome, e-mail, matrícula…" className="h-9 bg-[#fbfcfa] border-[#dce5de] font-normal normal-case tracking-normal" /></label><Button variant="ghost" size="sm" onClick={onClear} className="h-9 text-[#75827f] hover:text-[#e4684d]">Limpar</Button></div>;
+function FilterBar({
+  trips,
+  from,
+  to,
+  setFrom,
+  setTo,
+  vehicle,
+  setVehicle,
+  driver,
+  setDriver,
+  status,
+  setStatus,
+  destination,
+  setDestination,
+  onClear,
+}: {
+  trips: Trip[];
+  from: string;
+  to: string;
+  setFrom: (v: string) => void;
+  setTo: (v: string) => void;
+  vehicle: string;
+  setVehicle: (v: string) => void;
+  driver: string;
+  setDriver: (v: string) => void;
+  status: string;
+  setStatus: (v: string) => void;
+  destination: string;
+  setDestination: (v: string) => void;
+  onClear: () => void;
+}) {
+  const vehicles = alphaSort(
+    Array.from(
+      new Set(trips.map(t => t.vehiclePlate).filter(Boolean))
+    ) as string[]
+  );
+  const drivers = alphaSort(
+    Array.from(
+      new Set(trips.map(t => t.driverName).filter(Boolean))
+    ) as string[]
+  );
+  const destinations = alphaSort(
+    Array.from(
+      new Set(trips.map(t => t.destination).filter(Boolean))
+    ) as string[]
+  ) as string[];
+  return (
+    <div className="no-print flex flex-wrap items-end gap-3 rounded-2xl bg-white border border-[#e3e9e4] p-4 shadow-[0_5px_18px_rgba(20,40,63,0.04)]">
+      <div className="flex items-center gap-2 text-[#4f8f77] self-center mr-1">
+        <Filter className="h-4 w-4" />
+        <span className="text-xs font-semibold uppercase tracking-[0.12em]">
+          Filtros
+        </span>
+      </div>
+      <label className="grid gap-1 text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
+        De
+        <input
+          type="date"
+          min={DATE_MIN}
+          max={DATE_MAX}
+          value={from}
+          onChange={e => setFrom(e.target.value)}
+          className="h-9 rounded-lg border border-[#dce5de] bg-[#fbfcfa] px-2 text-sm font-normal normal-case tracking-normal text-[#14283f]"
+        />
+      </label>
+      <label className="grid gap-1 text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
+        Até
+        <input
+          type="date"
+          min={DATE_MIN}
+          max={DATE_MAX}
+          value={to}
+          onChange={e => setTo(e.target.value)}
+          className="h-9 rounded-lg border border-[#dce5de] bg-[#fbfcfa] px-2 text-sm font-normal normal-case tracking-normal text-[#14283f]"
+        />
+      </label>
+      <label className="grid gap-1 min-w-[145px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
+        Veículo
+        <Select value={vehicle} onValueChange={setVehicle}>
+          <SelectTrigger className="h-9 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal">
+            <SelectValue placeholder="Todos" />
+          </SelectTrigger>
+          <SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50">
+            <SelectItem value="todos">Todos</SelectItem>
+            {vehicles.map(v => (
+              <SelectItem key={v} value={v}>
+                {v}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </label>
+      <label className="grid gap-1 min-w-[165px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
+        Motorista
+        <Select value={driver} onValueChange={setDriver}>
+          <SelectTrigger className="h-9 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal">
+            <SelectValue placeholder="Todos" />
+          </SelectTrigger>
+          <SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50">
+            <SelectItem value="todos">Todos</SelectItem>
+            {drivers.map(v => (
+              <SelectItem key={v} value={v}>
+                {v}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </label>
+      <label className="grid gap-1 min-w-[145px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
+        Status
+        <Select value={status} onValueChange={setStatus}>
+          <SelectTrigger className="h-9 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal">
+            <SelectValue placeholder="Todos" />
+          </SelectTrigger>
+          <SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50">
+            <SelectItem value="todos">Todos</SelectItem>
+            <SelectItem value="Concluída">Concluída</SelectItem>
+            <SelectItem value="Em andamento">Em andamento</SelectItem>
+            <SelectItem value="Cancelada">Cancelada</SelectItem>
+          </SelectContent>
+        </Select>
+      </label>
+      <label className="grid gap-1 min-w-[165px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
+        Destino
+        <Select value={destination} onValueChange={setDestination}>
+          <SelectTrigger className="h-9 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal">
+            <SelectValue placeholder="Todos" />
+          </SelectTrigger>
+          <SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50">
+            <SelectItem value="todos">Todos</SelectItem>
+            {destinations.map(v => (
+              <SelectItem key={v} value={v}>
+                {v}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </label>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onClear}
+        className="h-9 text-[#75827f] hover:text-[#e4684d]"
+      >
+        Limpar
+      </Button>
+    </div>
+  );
 }
 
-function PrintButton({ label = "Imprimir relatório" }: { label?: string }) { return <Button onClick={() => window.print()} variant="outline" className="no-print border-[#d6e0d8] bg-white text-[#244537] hover:bg-[#f1f6f2] gap-2"><Printer className="h-4 w-4" />{label}</Button>; }
+function RecordsFilterBar({
+  records,
+  from,
+  to,
+  setFrom,
+  setTo,
+  vehicle,
+  setVehicle,
+  event,
+  setEvent,
+  search,
+  setSearch,
+  onClear,
+}: {
+  records: RecordRow[];
+  from: string;
+  to: string;
+  setFrom: (v: string) => void;
+  setTo: (v: string) => void;
+  vehicle: string;
+  setVehicle: (v: string) => void;
+  event: string;
+  setEvent: (v: string) => void;
+  search: string;
+  setSearch: (v: string) => void;
+  onClear: () => void;
+}) {
+  const vehicles = alphaSort(
+    Array.from(
+      new Set(records.map(r => r.vehiclePlate).filter(Boolean))
+    ) as string[]
+  );
+  const events = alphaSort(
+    Array.from(new Set(records.map(r => r.event).filter(Boolean))) as string[]
+  ) as string[];
+  return (
+    <div className="no-print flex flex-wrap items-end gap-3 rounded-2xl bg-white border border-[#e3e9e4] p-4 shadow-[0_5px_18px_rgba(20,40,63,0.04)]">
+      <div className="flex items-center gap-2 text-[#4f8f77] self-center mr-1">
+        <Filter className="h-4 w-4" />
+        <span className="text-xs font-semibold uppercase tracking-[0.12em]">
+          Filtros
+        </span>
+      </div>
+      <label className="grid gap-1 text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
+        De
+        <input
+          type="date"
+          min={DATE_MIN}
+          max={DATE_MAX}
+          value={from}
+          onChange={e => setFrom(e.target.value)}
+          className="h-9 rounded-lg border border-[#dce5de] bg-[#fbfcfa] px-2 text-sm font-normal normal-case tracking-normal text-[#14283f]"
+        />
+      </label>
+      <label className="grid gap-1 text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
+        Até
+        <input
+          type="date"
+          min={DATE_MIN}
+          max={DATE_MAX}
+          value={to}
+          onChange={e => setTo(e.target.value)}
+          className="h-9 rounded-lg border border-[#dce5de] bg-[#fbfcfa] px-2 text-sm font-normal normal-case tracking-normal text-[#14283f]"
+        />
+      </label>
+      <label className="grid gap-1 min-w-[170px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
+        Veículo
+        <Select value={vehicle} onValueChange={setVehicle}>
+          <SelectTrigger className="h-9 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal">
+            <SelectValue placeholder="Todos" />
+          </SelectTrigger>
+          <SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50">
+            <SelectItem value="todos">Todos</SelectItem>
+            {vehicles.map(v => (
+              <SelectItem key={v} value={v}>
+                {v}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </label>
+      <label className="grid gap-1 min-w-[210px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
+        Evento
+        <Select value={event} onValueChange={setEvent}>
+          <SelectTrigger className="h-9 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal">
+            <SelectValue placeholder="Todos" />
+          </SelectTrigger>
+          <SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50">
+            <SelectItem value="todos">Todos</SelectItem>
+            {events.map(v => (
+              <SelectItem key={v} value={v}>
+                {v}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </label>
+      <label className="grid gap-1 min-w-[220px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
+        Buscar
+        <Input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Nome, e-mail, matrícula…"
+          className="h-9 bg-[#fbfcfa] border-[#dce5de] font-normal normal-case tracking-normal"
+        />
+      </label>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onClear}
+        className="h-9 text-[#75827f] hover:text-[#e4684d]"
+      >
+        Limpar
+      </Button>
+    </div>
+  );
+}
+
+function PrintButton({ label = "Imprimir relatório" }: { label?: string }) {
+  return (
+    <Button
+      onClick={() => window.print()}
+      variant="outline"
+      className="no-print border-[#d6e0d8] bg-white text-[#244537] hover:bg-[#f1f6f2] gap-2"
+    >
+      <Printer className="h-4 w-4" />
+      {label}
+    </Button>
+  );
+}
 
 export default function Home() {
   const { user, loading, logout } = useAuth();
   const visitorAccessQuery = trpc.auth.visitorAccess.useQuery();
   const systemAccessQuery = trpc.auth.systemAccess.useQuery();
-  const canViewData = (Boolean(user) || visitorAccessQuery.data === true) && (systemAccessQuery.data === true || user?.role === "admin");
-  const tripsQuery = trpc.trips.list.useQuery(undefined, { enabled: canViewData });
-  const vehiclesQuery = trpc.vehicles.list.useQuery(undefined, { enabled: canViewData });
-  const recordsQuery = trpc.departureArrival.list.useQuery(undefined, { enabled: canViewData });
-  const teamQuery = trpc.team.list.useQuery(undefined, { enabled: Boolean(user && user.role === "admin") });
-  const visitorMutation = trpc.auth.setVisitorAccess.useMutation({ onSuccess: enabled => { visitorAccessQuery.refetch(); toast.success(enabled ? "Visitantes liberados." : "Visitantes bloqueados."); }, onError: error => toast.error(error.message) });
-  const systemMutation = trpc.auth.setSystemAccess.useMutation({ onSuccess: enabled => { systemAccessQuery.refetch(); toast.success(enabled ? "Sistema ativado." : "Sistema colocado em manutenção."); }, onError: error => toast.error(error.message) });
-  const addMemberMutation = trpc.team.addMember.useMutation({ onSuccess: () => { toast.success("Membro adicionado à equipe."); teamQuery.refetch(); setMemberDialog(false); setMemberName(""); setMemberEmail(""); setMemberRole("user"); }, onError: error => toast.error(error.message) });
-  const updateMemberMutation = trpc.team.updateMember.useMutation({ onSuccess: () => { toast.success("Membro atualizado."); teamQuery.refetch(); setMemberDialog(false); setEditingId(null); setMemberName(""); setMemberEmail(""); setMemberRole("user"); }, onError: error => toast.error(error.message) });
-  const removeMemberMutation = trpc.team.removeMember.useMutation({ onSuccess: () => { toast.success("Membro excluído."); teamQuery.refetch(); }, onError: error => toast.error(error.message) });
-  const setActiveMutation = trpc.team.setActive.useMutation({ onSuccess: () => { toast.success("Acesso atualizado."); teamQuery.refetch(); }, onError: error => toast.error(error.message) });
+  const canViewData =
+    (Boolean(user) || visitorAccessQuery.data === true) &&
+    (systemAccessQuery.data === true || user?.role === "admin");
+  const tripsQuery = trpc.trips.list.useQuery(undefined, {
+    enabled: canViewData,
+  });
+  const vehiclesQuery = trpc.vehicles.list.useQuery(undefined, {
+    enabled: canViewData,
+  });
+  const recordsQuery = trpc.departureArrival.list.useQuery(undefined, {
+    enabled: canViewData,
+  });
+  const teamQuery = trpc.team.list.useQuery(undefined, {
+    enabled: Boolean(user && user.role === "admin"),
+  });
+  const visitorMutation = trpc.auth.setVisitorAccess.useMutation({
+    onSuccess: enabled => {
+      visitorAccessQuery.refetch();
+      toast.success(
+        enabled ? "Visitantes liberados." : "Visitantes bloqueados."
+      );
+    },
+    onError: error => toast.error(error.message),
+  });
+  const systemMutation = trpc.auth.setSystemAccess.useMutation({
+    onSuccess: enabled => {
+      systemAccessQuery.refetch();
+      toast.success(
+        enabled ? "Sistema ativado." : "Sistema colocado em manutenção."
+      );
+    },
+    onError: error => toast.error(error.message),
+  });
+  const addMemberMutation = trpc.team.addMember.useMutation({
+    onSuccess: () => {
+      toast.success("Membro adicionado à equipe.");
+      teamQuery.refetch();
+      setMemberDialog(false);
+      setMemberName("");
+      setMemberEmail("");
+      setMemberRole("user");
+    },
+    onError: error => toast.error(error.message),
+  });
+  const updateMemberMutation = trpc.team.updateMember.useMutation({
+    onSuccess: () => {
+      toast.success("Membro atualizado.");
+      teamQuery.refetch();
+      setMemberDialog(false);
+      setEditingId(null);
+      setMemberName("");
+      setMemberEmail("");
+      setMemberRole("user");
+    },
+    onError: error => toast.error(error.message),
+  });
+  const removeMemberMutation = trpc.team.removeMember.useMutation({
+    onSuccess: () => {
+      toast.success("Membro excluído.");
+      teamQuery.refetch();
+    },
+    onError: error => toast.error(error.message),
+  });
+  const setActiveMutation = trpc.team.setActive.useMutation({
+    onSuccess: () => {
+      toast.success("Acesso atualizado.");
+      teamQuery.refetch();
+    },
+    onError: error => toast.error(error.message),
+  });
   const [tab, setTab] = useState<Tab>("gráficos");
   const [mobileMenu, setMobileMenu] = useState(false);
   const [visitorMode, setVisitorMode] = useState(false);
-  const [from, setFrom] = useState(DATE_MIN); const [to, setTo] = useState(DATE_MAX);
-  const [vehicle, setVehicle] = useState("todos"); const [driver, setDriver] = useState("todos"); const [status, setStatus] = useState("todos"); const [destination, setDestination] = useState("todos");
-  const [tripSearch, setTripSearch] = useState(""); const [tripView, setTripView] = useState<"table" | "cards">("table");
-  const [tripSort, setTripSort] = useState<SortState>({ key: "tripDate", direction: "desc" }); const [recordSort, setRecordSort] = useState<SortState>({ key: "recordedAt", direction: "desc" });
-  const [recordSearch, setRecordSearch] = useState(""); const [recordEvent, setRecordEvent] = useState("todos"); const [recordVehicle, setRecordVehicle] = useState("todos");
+  const [from, setFrom] = useState(DATE_MIN);
+  const [to, setTo] = useState(DATE_MAX);
+  const [vehicle, setVehicle] = useState("todos");
+  const [driver, setDriver] = useState("todos");
+  const [status, setStatus] = useState("todos");
+  const [destination, setDestination] = useState("todos");
+  const [tripSearch, setTripSearch] = useState("");
+  const [tripView, setTripView] = useState<"table" | "cards">("table");
+  const [tripSort, setTripSort] = useState<SortState>({
+    key: "tripDate",
+    direction: "desc",
+  });
+  const [recordSort, setRecordSort] = useState<SortState>({
+    key: "recordedAt",
+    direction: "desc",
+  });
+  const [recordSearch, setRecordSearch] = useState("");
+  const [recordEvent, setRecordEvent] = useState("todos");
+  const [recordVehicle, setRecordVehicle] = useState("todos");
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
-  const [memberDialog, setMemberDialog] = useState(false); const [editingId, setEditingId] = useState<number | null>(null); const [memberName, setMemberName] = useState(""); const [memberEmail, setMemberEmail] = useState(""); const [memberRole, setMemberRole] = useState<"user" | "admin">("user");
+  const [selectedRecord, setSelectedRecord] =
+    useState<ConsolidatedRecord | null>(null);
+  const [memberDialog, setMemberDialog] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [memberName, setMemberName] = useState("");
+  const [memberEmail, setMemberEmail] = useState("");
+  const [memberRole, setMemberRole] = useState<"user" | "admin">("user");
 
-  const rawTrips = (tripsQuery.data ?? []) as Trip[]; const allTrips = rawTrips;
-  const rawRecords = (recordsQuery.data ?? []) as RecordRow[]; const consolidatedRecords = useMemo(() => consolidateRecords(rawRecords), [rawRecords]);
-  const filteredTrips = useMemo(() => { const rows = allTrips.filter(trip => { const haystack = [trip.vehiclePlate, trip.vehicleModel, trip.driverName, trip.origin, trip.destination, trip.purpose].join(" ").toLowerCase(); return dateWithin(trip.tripDate, from, to) && (vehicle === "todos" || trip.vehiclePlate === vehicle) && (driver === "todos" || trip.driverName === driver) && (status === "todos" || trip.status === status) && (destination === "todos" || trip.destination === destination) && haystack.includes(tripSearch.toLowerCase()); }); return [...rows].sort((a, b) => compareSortValues(a[tripSort.key as keyof Trip], b[tripSort.key as keyof Trip], tripSort.direction)); }, [allTrips, from, to, vehicle, driver, status, destination, tripSearch, tripSort]);
-  const filteredRecords = useMemo(() => { const rows = consolidatedRecords.filter(record => { const arrival = record.arrival; const haystack = [record.respondentName, record.employeeId, record.vehiclePlate, record.event, record.serviceType, record.summary, record.email, arrival?.respondentName, arrival?.employeeId, arrival?.kmFinal].join(" ").toLowerCase(); return dateWithin(record.recordedAt, from, to) && (recordVehicle === "todos" || record.vehiclePlate === recordVehicle) && (recordEvent === "todos" || record.event === recordEvent) && haystack.includes(recordSearch.toLowerCase()); }); return [...rows].sort((a, b) => compareSortValues(a[recordSort.key as keyof ConsolidatedRecord], b[recordSort.key as keyof ConsolidatedRecord], recordSort.direction)); }, [consolidatedRecords, from, to, recordVehicle, recordEvent, recordSearch, recordSort]);
-  const clearFilters = () => { setFrom(DATE_MIN); setTo(DATE_MAX); setVehicle("todos"); setDriver("todos"); setStatus("todos"); setDestination("todos"); };
-  const clearRecordFilters = () => { setFrom(DATE_MIN); setTo(DATE_MAX); setRecordVehicle("todos"); setRecordEvent("todos"); setRecordSearch(""); };
-  const completedTrips = filteredTrips.filter(t => t.status === "Concluída").length; const uniqueVehicles = new Set(filteredTrips.map(t => t.vehiclePlate)).size; const uniqueDrivers = new Set(filteredTrips.map(t => t.driverName)).size; const uniqueDestinations = new Set(filteredTrips.map(t => t.destination).filter(Boolean)).size;
-  const monthData = Object.entries(filteredTrips.reduce<Record<string, number>>((acc, trip) => { const key = monthKey(trip.tripDate); acc[key] = (acc[key] || 0) + 1; return acc; }, {})).sort(([a], [b]) => a.localeCompare(b)).map(([month, total]) => ({ month: monthLabel(month), viagens: total }));
-  const destinationData = Object.entries(filteredTrips.reduce<Record<string, number>>((acc, trip) => { const key = trip.destination || "Não informado"; acc[key] = (acc[key] || 0) + 1; return acc; }, {})).sort(([, a], [, b]) => b - a).slice(0, 6).map(([name, total]) => ({ name: name.length > 20 ? `${name.slice(0, 20)}…` : name, total }));
-  const statusData = ["Concluída", "Em andamento", "Cancelada"].map(name => ({ name, value: filteredTrips.filter(t => t.status === name).length })).filter(item => item.value > 0);
-  const vehicleFilteredTrips = useMemo(() => allTrips.filter(trip => dateWithin(trip.tripDate, from, to) && (vehicle === "todos" || trip.vehiclePlate === vehicle) && (driver === "todos" || trip.driverName === driver) && (status === "todos" || trip.status === status) && (destination === "todos" || trip.destination === destination)), [allTrips, from, to, vehicle, driver, status, destination]);
-  const vehicleFilteredRecords = useMemo(() => rawRecords.filter(record => dateWithin(record.recordedAt, from, to) && (vehicle === "todos" || record.vehiclePlate === vehicle)), [rawRecords, from, to, vehicle]);
-  const dbVehicles = (vehiclesQuery.data ?? []) as Vehicle[]; const allVehicleCards = dbVehicles.length ? dbVehicles : Array.from(new Map(allTrips.map(t => [t.vehiclePlate, { id: t.id, plate: t.vehiclePlate, model: t.vehicleModel, category: "Frota operacional", year: 2024 }])).values()); const visibleVehicleKeys = new Set([...vehicleFilteredTrips.map(trip => trip.vehiclePlate), ...vehicleFilteredRecords.map(record => record.vehiclePlate)]); const vehicleCards = allVehicleCards.filter(item => visibleVehicleKeys.has(item.plate));
-  const team = (teamQuery.data ?? []) as TeamMember[]; const selectedVehicleTrips = selectedVehicle ? vehicleFilteredTrips.filter(t => t.vehiclePlate === selectedVehicle.plate).sort((a, b) => new Date(b.tripDate).getTime() - new Date(a.tripDate).getTime()) : []; const selectedVehicleRecords = selectedVehicle ? vehicleFilteredRecords.filter(r => r.vehiclePlate === selectedVehicle.plate).sort((a, b) => new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime()) : [];
-  const tabs: Array<{ id: Tab; label: string; icon: React.ElementType }> = [{ id: "gráficos", label: "Gráficos", icon: BarChart3 }, { id: "viagens", label: "Viagens", icon: MapPin }, { id: "veículos", label: "Veículos", icon: Truck }, { id: "registros", label: "Registros", icon: ClipboardList }, { id: "equipe", label: "Equipe", icon: Users }];
+  const rawTrips = (tripsQuery.data ?? []) as Trip[];
+  const allTrips = rawTrips;
+  const rawRecords = (recordsQuery.data ?? []) as RecordRow[];
+  const consolidatedRecords = useMemo(
+    () => consolidateRecords(rawRecords),
+    [rawRecords]
+  );
+  const filteredTrips = useMemo(() => {
+    const rows = allTrips.filter(trip => {
+      const haystack = [
+        trip.vehiclePlate,
+        trip.vehicleModel,
+        trip.driverName,
+        trip.origin,
+        trip.destination,
+        trip.purpose,
+      ]
+        .join(" ")
+        .toLowerCase();
+      return (
+        dateWithin(trip.tripDate, from, to) &&
+        (vehicle === "todos" || trip.vehiclePlate === vehicle) &&
+        (driver === "todos" || trip.driverName === driver) &&
+        (status === "todos" || trip.status === status) &&
+        (destination === "todos" || trip.destination === destination) &&
+        haystack.includes(tripSearch.toLowerCase())
+      );
+    });
+    return [...rows].sort((a, b) =>
+      compareSortValues(
+        a[tripSort.key as keyof Trip],
+        b[tripSort.key as keyof Trip],
+        tripSort.direction
+      )
+    );
+  }, [
+    allTrips,
+    from,
+    to,
+    vehicle,
+    driver,
+    status,
+    destination,
+    tripSearch,
+    tripSort,
+  ]);
+  const filteredRecords = useMemo(() => {
+    const rows = consolidatedRecords.filter(record => {
+      const arrival = record.arrival;
+      const haystack = [
+        record.respondentName,
+        record.employeeId,
+        record.vehiclePlate,
+        record.event,
+        record.serviceType,
+        record.summary,
+        record.email,
+        arrival?.respondentName,
+        arrival?.employeeId,
+        arrival?.kmFinal,
+      ]
+        .join(" ")
+        .toLowerCase();
+      return (
+        dateWithin(record.recordedAt, from, to) &&
+        (recordVehicle === "todos" || record.vehiclePlate === recordVehicle) &&
+        (recordEvent === "todos" || record.event === recordEvent) &&
+        haystack.includes(recordSearch.toLowerCase())
+      );
+    });
+    return [...rows].sort((a, b) =>
+      compareSortValues(
+        a[recordSort.key as keyof ConsolidatedRecord],
+        b[recordSort.key as keyof ConsolidatedRecord],
+        recordSort.direction
+      )
+    );
+  }, [
+    consolidatedRecords,
+    from,
+    to,
+    recordVehicle,
+    recordEvent,
+    recordSearch,
+    recordSort,
+  ]);
+  const clearFilters = () => {
+    setFrom(DATE_MIN);
+    setTo(DATE_MAX);
+    setVehicle("todos");
+    setDriver("todos");
+    setStatus("todos");
+    setDestination("todos");
+  };
+  const clearRecordFilters = () => {
+    setFrom(DATE_MIN);
+    setTo(DATE_MAX);
+    setRecordVehicle("todos");
+    setRecordEvent("todos");
+    setRecordSearch("");
+  };
+  const completedTrips = filteredTrips.filter(
+    t => t.status === "Concluída"
+  ).length;
+  const uniqueVehicles = new Set(filteredTrips.map(t => t.vehiclePlate)).size;
+  const uniqueDrivers = new Set(filteredTrips.map(t => t.driverName)).size;
+  const uniqueDestinations = new Set(
+    filteredTrips.map(t => t.destination).filter(Boolean)
+  ).size;
+  const monthData = Object.entries(
+    filteredTrips.reduce<Record<string, number>>((acc, trip) => {
+      const key = monthKey(trip.tripDate);
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {})
+  )
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, total]) => ({ month: monthLabel(month), viagens: total }));
+  const destinationData = Object.entries(
+    filteredTrips.reduce<Record<string, number>>((acc, trip) => {
+      const key = trip.destination || "Não informado";
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {})
+  )
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 6)
+    .map(([name, total]) => ({
+      name: name.length > 20 ? `${name.slice(0, 20)}…` : name,
+      total,
+    }));
+  const statusData = ["Concluída", "Em andamento", "Cancelada"]
+    .map(name => ({
+      name,
+      value: filteredTrips.filter(t => t.status === name).length,
+    }))
+    .filter(item => item.value > 0);
+  const vehicleFilteredTrips = useMemo(
+    () =>
+      allTrips.filter(
+        trip =>
+          dateWithin(trip.tripDate, from, to) &&
+          (vehicle === "todos" || trip.vehiclePlate === vehicle) &&
+          (driver === "todos" || trip.driverName === driver) &&
+          (status === "todos" || trip.status === status) &&
+          (destination === "todos" || trip.destination === destination)
+      ),
+    [allTrips, from, to, vehicle, driver, status, destination]
+  );
+  const vehicleFilteredRecords = useMemo(
+    () =>
+      rawRecords.filter(
+        record =>
+          dateWithin(record.recordedAt, from, to) &&
+          (vehicle === "todos" || record.vehiclePlate === vehicle)
+      ),
+    [rawRecords, from, to, vehicle]
+  );
+  const dbVehicles = (vehiclesQuery.data ?? []) as Vehicle[];
+  const allVehicleCards = dbVehicles.length
+    ? dbVehicles
+    : Array.from(
+        new Map(
+          allTrips.map(t => [
+            t.vehiclePlate,
+            {
+              id: t.id,
+              plate: t.vehiclePlate,
+              model: t.vehicleModel,
+              category: "Frota operacional",
+              year: 2024,
+            },
+          ])
+        ).values()
+      );
+  const visibleVehicleKeys = new Set([
+    ...vehicleFilteredTrips.map(trip => trip.vehiclePlate),
+    ...vehicleFilteredRecords.map(record => record.vehiclePlate),
+  ]);
+  const vehicleCards = allVehicleCards.filter(item =>
+    visibleVehicleKeys.has(item.plate)
+  );
+  const team = (teamQuery.data ?? []) as TeamMember[];
+  const selectedVehicleTrips = selectedVehicle
+    ? vehicleFilteredTrips
+        .filter(t => t.vehiclePlate === selectedVehicle.plate)
+        .sort(
+          (a, b) =>
+            new Date(b.tripDate).getTime() - new Date(a.tripDate).getTime()
+        )
+    : [];
+  const selectedVehicleRecords = selectedVehicle
+    ? vehicleFilteredRecords
+        .filter(r => r.vehiclePlate === selectedVehicle.plate)
+        .sort(
+          (a, b) =>
+            new Date(b.recordedAt).getTime() - new Date(a.recordedAt).getTime()
+        )
+    : [];
+  const tabs: Array<{ id: Tab; label: string; icon: React.ElementType }> = [
+    { id: "gráficos", label: "Gráficos", icon: BarChart3 },
+    { id: "viagens", label: "Viagens", icon: MapPin },
+    { id: "veículos", label: "Veículos", icon: Truck },
+    { id: "registros", label: "Registros", icon: ClipboardList },
+    { id: "equipe", label: "Equipe", icon: Users },
+  ];
 
-  if (loading || visitorAccessQuery.isLoading || systemAccessQuery.isLoading) return <div className="min-h-screen flex items-center justify-center text-[#4f8f77]"><Gauge className="h-5 w-5 animate-pulse mr-2" />Carregando seu espaço…</div>;
-  if (systemAccessQuery.data === false && user?.role !== "admin") return <div className="min-h-screen bg-[#14283f] text-white flex items-center justify-center p-6"><Card className="w-full max-w-lg border-white/10 bg-white/10 text-white backdrop-blur-xl"><CardContent className="p-10 text-center"><Power className="h-12 w-12 text-[#e4684d] mx-auto" /><h1 className="font-display text-3xl font-bold mt-5">Sistema em manutenção</h1><p className="text-white/65 mt-3">O acesso será reativado assim que a manutenção for concluída.</p><Button type="button" onClick={() => startLogin()} className="mt-8 bg-white text-[#14283f] hover:bg-[#edf3ef]">Entrar como administrador</Button></CardContent></Card></div>;
-  if (!user && (visitorAccessQuery.data !== true || !visitorMode)) return <div className="min-h-screen bg-[#14283f] text-white flex items-center justify-center p-6 relative overflow-hidden"><div className="absolute -right-32 -top-24 h-96 w-96 rounded-full bg-[#e4684d]/20 blur-3xl" /><div className="absolute -left-24 bottom-0 h-80 w-80 rounded-full bg-[#4f8f77]/30 blur-3xl" /><Card className="w-full max-w-lg border-white/10 bg-white/10 text-white backdrop-blur-xl shadow-2xl relative"><CardContent className="p-10 md:p-14"><div className="h-12 w-12 rounded-2xl bg-[#e4684d] flex items-center justify-center mb-8"><VehicleMark className="h-7 w-7 text-white" /></div><p className="text-[#e9b5a7] uppercase tracking-[0.2em] text-xs font-semibold">Painel operacional</p><h1 className="font-display text-4xl md:text-5xl font-bold leading-tight mt-3">Controle de<br /><span className="text-[#ef876f]">Viagens.</span></h1><p className="text-white/65 mt-6 max-w-sm leading-relaxed">Acompanhe 52 meses de deslocamentos, frota e equipe em um só lugar.</p><Button type="button" onClick={() => startLogin()} size="lg" className="w-full mt-8 bg-white text-[#14283f] hover:bg-[#edf3ef] gap-2">Entrar com Google <ChevronDown className="h-4 w-4 -rotate-90" /></Button>{visitorAccessQuery.data === true && <><div className="flex items-center gap-3 my-5 text-white/35 text-xs"><div className="h-px flex-1 bg-white/15" />ou<div className="h-px flex-1 bg-white/15" /></div><Button onClick={() => setVisitorMode(true)} variant="outline" size="lg" className="w-full border-white/25 bg-white/5 text-white hover:bg-white/10">Continuar como visitante</Button><p className="text-center text-xs text-white/45 mt-3">Acesso público liberado pelo administrador</p></> }<p className="text-center text-xs text-white/40 mt-5">Use a conta Google cadastrada pelo administrador.</p></CardContent></Card></div>;
+  if (loading || visitorAccessQuery.isLoading || systemAccessQuery.isLoading)
+    return (
+      <div className="min-h-screen flex items-center justify-center text-[#4f8f77]">
+        <Gauge className="h-5 w-5 animate-pulse mr-2" />
+        Carregando seu espaço…
+      </div>
+    );
+  if (systemAccessQuery.data === false && user?.role !== "admin")
+    return (
+      <div className="min-h-screen bg-[#14283f] text-white flex items-center justify-center p-6">
+        <Card className="w-full max-w-lg border-white/10 bg-white/10 text-white backdrop-blur-xl">
+          <CardContent className="p-10 text-center">
+            <Power className="h-12 w-12 text-[#e4684d] mx-auto" />
+            <h1 className="font-display text-3xl font-bold mt-5">
+              Sistema em manutenção
+            </h1>
+            <p className="text-white/65 mt-3">
+              O acesso será reativado assim que a manutenção for concluída.
+            </p>
+            <Button
+              type="button"
+              onClick={() => startLogin()}
+              className="mt-8 bg-white text-[#14283f] hover:bg-[#edf3ef]"
+            >
+              Entrar como administrador
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  if (!user && (visitorAccessQuery.data !== true || !visitorMode))
+    return (
+      <div className="min-h-screen bg-[#14283f] text-white flex items-center justify-center p-6 relative overflow-hidden">
+        <div className="absolute -right-32 -top-24 h-96 w-96 rounded-full bg-[#e4684d]/20 blur-3xl" />
+        <div className="absolute -left-24 bottom-0 h-80 w-80 rounded-full bg-[#4f8f77]/30 blur-3xl" />
+        <Card className="w-full max-w-lg border-white/10 bg-white/10 text-white backdrop-blur-xl shadow-2xl relative">
+          <CardContent className="p-10 md:p-14">
+            <div className="h-12 w-12 rounded-2xl bg-[#e4684d] flex items-center justify-center mb-8">
+              <VehicleMark className="h-7 w-7 text-white" />
+            </div>
+            <p className="text-[#e9b5a7] uppercase tracking-[0.2em] text-xs font-semibold">
+              Painel operacional
+            </p>
+            <h1 className="font-display text-4xl md:text-5xl font-bold leading-tight mt-3">
+              Controle de
+              <br />
+              <span className="text-[#ef876f]">Viagens.</span>
+            </h1>
+            <p className="text-white/65 mt-6 max-w-sm leading-relaxed">
+              Acompanhe 52 meses de deslocamentos, frota e equipe em um só
+              lugar.
+            </p>
+            <Button
+              type="button"
+              onClick={() => startLogin()}
+              size="lg"
+              className="w-full mt-8 bg-white text-[#14283f] hover:bg-[#edf3ef] gap-2"
+            >
+              Entrar com Google <ChevronDown className="h-4 w-4 -rotate-90" />
+            </Button>
+            {visitorAccessQuery.data === true && (
+              <>
+                <div className="flex items-center gap-3 my-5 text-white/35 text-xs">
+                  <div className="h-px flex-1 bg-white/15" />
+                  ou
+                  <div className="h-px flex-1 bg-white/15" />
+                </div>
+                <Button
+                  onClick={() => setVisitorMode(true)}
+                  variant="outline"
+                  size="lg"
+                  className="w-full border-white/25 bg-white/5 text-white hover:bg-white/10"
+                >
+                  Continuar como visitante
+                </Button>
+                <p className="text-center text-xs text-white/45 mt-3">
+                  Acesso público liberado pelo administrador
+                </p>
+              </>
+            )}
+            <p className="text-center text-xs text-white/40 mt-5">
+              Use a conta Google cadastrada pelo administrador.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
 
-  return <div className="min-h-screen bg-[#f5f6f2] text-[#14283f]"><header className="no-print sticky top-0 z-30 border-b border-[#e1e8e2] bg-[#f5f6f2]/95 backdrop-blur-md"><div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 h-[74px] flex items-center justify-between gap-4"><div className="flex items-center gap-3 shrink-0"><div className="h-10 w-10 rounded-xl bg-[#14283f] text-white flex items-center justify-center shadow-sm"><VehicleMark className="h-6 w-6 text-white" /></div><div><div className="font-display font-bold text-lg leading-none">Controle <span className="text-[#e4684d]">de Viagens</span></div><div className="text-[10px] uppercase tracking-[0.16em] text-[#75827f] mt-1">Painel de operações</div></div></div><nav className="hidden xl:flex items-center gap-1 rounded-xl bg-white/70 p-1 border border-[#e1e8e2]">{tabs.map(item => <button key={item.id} onClick={() => setTab(item.id)} className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all ${tab === item.id ? "bg-[#14283f] text-white shadow-sm" : "text-[#61716d] hover:text-[#14283f] hover:bg-[#eef3ef]"}`}><item.icon className="h-4 w-4" />{item.label}</button>)}</nav><div className="flex items-center gap-2"><div className="hidden sm:flex items-center gap-2.5 pl-3 border-l border-[#dce5de]">{user ? <><Avatar className="h-9 w-9 border border-[#cfe0d4]"><AvatarFallback className="bg-[#e8f3ec] text-[#317154] text-xs font-bold">{initials(user.name)}</AvatarFallback></Avatar><div className="leading-tight"><p className="text-sm font-semibold max-w-[130px] truncate">{user.name || "Usuário"}</p><p className="text-[11px] text-[#75827f]">{user.role === "admin" ? "Administrador" : "Usuário"}</p></div></> : <div className="leading-tight"><p className="text-sm font-semibold">Visitante</p><p className="text-[11px] text-[#75827f]">Acesso público</p></div>}</div>{user?.role === "admin" && <Button variant="outline" size="sm" disabled={systemMutation.isPending} onClick={() => systemMutation.mutate({ enabled: systemAccessQuery.data !== true })} className={`no-print hidden md:inline-flex gap-1.5 ${systemAccessQuery.data ? "border-[#b9d8c4] bg-[#e8f3ec] text-[#317154]" : "border-[#f0c7bd] bg-[#fff0eb] text-[#b54e3c]"}`}><Power className="h-3.5 w-3.5" />Sistema {systemAccessQuery.data ? "Ativo" : "Inativo"}</Button>}{user ? <Button variant="ghost" size="icon" onClick={logout} className="no-print text-[#75827f] hover:text-[#e4684d]" title="Sair"><LogOut className="h-4 w-4" /></Button> : <Button variant="ghost" size="sm" onClick={() => setVisitorMode(false)} className="no-print text-[#4f8f77]">Entrar</Button>}<Button variant="ghost" size="icon" onClick={() => setMobileMenu(!mobileMenu)} className="xl:hidden"><Menu className="h-5 w-5" /></Button></div></div>{mobileMenu && <nav className="xl:hidden border-t border-[#e1e8e2] bg-white p-2 grid grid-cols-2 md:grid-cols-3 gap-2">{tabs.map(item => <button key={item.id} onClick={() => { setTab(item.id); setMobileMenu(false); }} className={`flex items-center gap-2 rounded-lg px-3 py-3 text-sm font-semibold ${tab === item.id ? "bg-[#14283f] text-white" : "text-[#61716d] bg-[#f5f6f2]"}`}><item.icon className="h-4 w-4" />{item.label}</button>)}</nav>}</header>
-    <main className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-7 md:py-9 print-area"><div className="flex flex-wrap items-end justify-between gap-4 mb-7"><div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#4f8f77]">05.2022 — 08.2026</p><h2 className="font-display text-3xl md:text-4xl font-bold tracking-tight mt-1">{tab === "gráficos" ? "Visão geral" : tab === "registros" ? "Registros" : tab.charAt(0).toUpperCase() + tab.slice(1)}</h2><p className="text-sm text-[#75827f] mt-2">{tab === "gráficos" ? "Indicadores calculados a partir das 52 abas mensais." : tab === "viagens" ? "Viagens planejadas em ordem cronológica decrescente." : tab === "veículos" ? "Frota combinada das duas planilhas, sem duplicação." : tab === "registros" ? "Dados brutos dos checklists de saída e chegada." : "Pessoas cadastradas com permissão de acesso."}</p></div><div className="flex gap-2">{tab !== "equipe" && <PrintButton />}</div></div>{tab !== "registros" && tab !== "equipe" && <FilterBar trips={allTrips} from={from} to={to} setFrom={setFrom} setTo={setTo} vehicle={vehicle} setVehicle={setVehicle} driver={driver} setDriver={setDriver} status={status} setStatus={setStatus} destination={destination} setDestination={setDestination} onClear={clearFilters} />}{tab === "registros" && <RecordsFilterBar records={consolidatedRecords} from={from} to={to} setFrom={setFrom} setTo={setTo} vehicle={recordVehicle} setVehicle={setRecordVehicle} event={recordEvent} setEvent={setRecordEvent} search={recordSearch} setSearch={setRecordSearch} onClear={clearRecordFilters} />}
+  return (
+    <div className="min-h-screen bg-[#f5f6f2] text-[#14283f]">
+      <header className="no-print sticky top-0 z-30 border-b border-[#e1e8e2] bg-[#f5f6f2]/95 backdrop-blur-md">
+        <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 h-[74px] flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="h-10 w-10 rounded-xl bg-[#14283f] text-white flex items-center justify-center shadow-sm">
+              <VehicleMark className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <div className="font-display font-bold text-lg leading-none">
+                Controle <span className="text-[#e4684d]">de Viagens</span>
+              </div>
+              <div className="text-[10px] uppercase tracking-[0.16em] text-[#75827f] mt-1">
+                Painel de operações
+              </div>
+            </div>
+          </div>
+          <nav className="hidden xl:flex items-center gap-1 rounded-xl bg-white/70 p-1 border border-[#e1e8e2]">
+            {tabs.map(item => (
+              <button
+                key={item.id}
+                onClick={() => setTab(item.id)}
+                className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all ${tab === item.id ? "bg-[#14283f] text-white shadow-sm" : "text-[#61716d] hover:text-[#14283f] hover:bg-[#eef3ef]"}`}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </button>
+            ))}
+          </nav>
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-2.5 pl-3 border-l border-[#dce5de]">
+              {user ? (
+                <>
+                  <Avatar className="h-9 w-9 border border-[#cfe0d4]">
+                    <AvatarFallback className="bg-[#e8f3ec] text-[#317154] text-xs font-bold">
+                      {initials(user.name)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="leading-tight">
+                    <p className="text-sm font-semibold max-w-[130px] truncate">
+                      {user.name || "Usuário"}
+                    </p>
+                    <p className="text-[11px] text-[#75827f]">
+                      {user.role === "admin" ? "Administrador" : "Usuário"}
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <div className="leading-tight">
+                  <p className="text-sm font-semibold">Visitante</p>
+                  <p className="text-[11px] text-[#75827f]">Acesso público</p>
+                </div>
+              )}
+            </div>
+            {user?.role === "admin" && (
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={systemMutation.isPending}
+                onClick={() =>
+                  systemMutation.mutate({
+                    enabled: systemAccessQuery.data !== true,
+                  })
+                }
+                className={`no-print hidden md:inline-flex gap-1.5 ${systemAccessQuery.data ? "border-[#b9d8c4] bg-[#e8f3ec] text-[#317154]" : "border-[#f0c7bd] bg-[#fff0eb] text-[#b54e3c]"}`}
+              >
+                <Power className="h-3.5 w-3.5" />
+                Sistema {systemAccessQuery.data ? "Ativo" : "Inativo"}
+              </Button>
+            )}
+            {user ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={logout}
+                className="no-print text-[#75827f] hover:text-[#e4684d]"
+                title="Sair"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setVisitorMode(false)}
+                className="no-print text-[#4f8f77]"
+              >
+                Entrar
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setMobileMenu(!mobileMenu)}
+              className="xl:hidden"
+            >
+              <Menu className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+        {mobileMenu && (
+          <nav className="xl:hidden border-t border-[#e1e8e2] bg-white p-2 grid grid-cols-2 md:grid-cols-3 gap-2">
+            {tabs.map(item => (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setTab(item.id);
+                  setMobileMenu(false);
+                }}
+                className={`flex items-center gap-2 rounded-lg px-3 py-3 text-sm font-semibold ${tab === item.id ? "bg-[#14283f] text-white" : "text-[#61716d] bg-[#f5f6f2]"}`}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </button>
+            ))}
+          </nav>
+        )}
+      </header>
+      <main className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-7 md:py-9 print-area">
+        <div className="flex flex-wrap items-end justify-between gap-4 mb-7">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#4f8f77]">
+              05.2022 — 08.2026
+            </p>
+            <h2 className="font-display text-3xl md:text-4xl font-bold tracking-tight mt-1">
+              {tab === "gráficos"
+                ? "Visão geral"
+                : tab === "registros"
+                  ? "Registros"
+                  : tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </h2>
+            <p className="text-sm text-[#75827f] mt-2">
+              {tab === "gráficos"
+                ? "Indicadores calculados a partir das 52 abas mensais."
+                : tab === "viagens"
+                  ? "Viagens planejadas em ordem cronológica decrescente."
+                  : tab === "veículos"
+                    ? "Frota combinada das duas planilhas, sem duplicação."
+                    : tab === "registros"
+                      ? "Dados brutos dos checklists de saída e chegada."
+                      : "Pessoas cadastradas com permissão de acesso."}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            {tab !== "equipe" && <PrintButton />}
+          </div>
+        </div>
+        {tab !== "registros" && tab !== "equipe" && (
+          <FilterBar
+            trips={allTrips}
+            from={from}
+            to={to}
+            setFrom={setFrom}
+            setTo={setTo}
+            vehicle={vehicle}
+            setVehicle={setVehicle}
+            driver={driver}
+            setDriver={setDriver}
+            status={status}
+            setStatus={setStatus}
+            destination={destination}
+            setDestination={setDestination}
+            onClear={clearFilters}
+          />
+        )}
+        {tab === "registros" && (
+          <RecordsFilterBar
+            records={consolidatedRecords}
+            from={from}
+            to={to}
+            setFrom={setFrom}
+            setTo={setTo}
+            vehicle={recordVehicle}
+            setVehicle={setRecordVehicle}
+            event={recordEvent}
+            setEvent={setRecordEvent}
+            search={recordSearch}
+            setSearch={setRecordSearch}
+            onClear={clearRecordFilters}
+          />
+        )}
 
-    {tab === "gráficos" && <section className="mt-6 space-y-6"><div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5"><StatCard label="Viagens no período" value={filteredTrips.length.toLocaleString("pt-BR")} detail={`${completedTrips} concluídas`} icon={MapPin} accent="bg-[#e4684d]" /><StatCard label="Destinos atendidos" value={uniqueDestinations.toLocaleString("pt-BR")} detail="localidades distintas" icon={MapPin} accent="bg-[#4f8f77]" /><StatCard label="Veículos utilizados" value={uniqueVehicles.toLocaleString("pt-BR")} detail="placas distintas" icon={CarFront} accent="bg-[#e5b74f]" /><StatCard label="Motoristas ativos" value={uniqueDrivers.toLocaleString("pt-BR")} detail="no recorte atual" icon={Users} accent="bg-[#7194b0]" /></div><div className="grid lg:grid-cols-[1.6fr_1fr] gap-5"><Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)]"><CardHeader className="flex flex-row items-center justify-between pb-1"><div><CardTitle className="font-display text-lg">Ritmo de viagens</CardTitle><p className="text-xs text-[#75827f] mt-1">Volume mensal das 52 abas</p></div><Badge variant="outline" className="border-[#dce5de] text-[#4f8f77]">52 meses</Badge></CardHeader><CardContent className="h-[295px] pt-5"><ResponsiveContainer width="100%" height="100%"><AreaChart data={monthData} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}><defs><linearGradient id="tripsFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#e4684d" stopOpacity={0.25} /><stop offset="100%" stopColor="#e4684d" stopOpacity={0} /></linearGradient></defs><CartesianGrid vertical={false} stroke="#edf1ed" /><XAxis dataKey="month" tick={{ fontSize: 10, fill: "#8b9793" }} tickLine={false} axisLine={false} interval="preserveStartEnd" /><YAxis allowDecimals={false} tick={{ fontSize: 10, fill: "#8b9793" }} tickLine={false} axisLine={false} /><Tooltip contentStyle={{ border: "1px solid #e1e8e2", borderRadius: 12, fontSize: 12 }} /><Area type="monotone" dataKey="viagens" stroke="#e4684d" strokeWidth={2.5} fill="url(#tripsFill)" /></AreaChart></ResponsiveContainer></CardContent></Card><Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)]"><CardHeader className="pb-1"><CardTitle className="font-display text-lg">Situação das viagens</CardTitle><p className="text-xs text-[#75827f] mt-1">Distribuição por status</p></CardHeader><CardContent className="h-[295px] flex items-center"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="47%" innerRadius={65} outerRadius={93} paddingAngle={4} stroke="none">{statusData.map((entry, index) => <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />)}</Pie><Tooltip contentStyle={{ border: "1px solid #e1e8e2", borderRadius: 12, fontSize: 12 }} /><text x="50%" y="45%" textAnchor="middle" dominantBaseline="middle" className="fill-[#14283f]" fontSize="26" fontWeight="700">{filteredTrips.length}</text><text x="50%" y="56%" textAnchor="middle" dominantBaseline="middle" className="fill-[#75827f]" fontSize="10">viagens</text></PieChart></ResponsiveContainer></CardContent><div className="px-6 pb-5 flex justify-center flex-wrap gap-x-4 gap-y-2">{statusData.map((item, index) => <span key={item.name} className="flex items-center gap-1.5 text-[11px] text-[#75827f]"><i className="h-2 w-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />{item.name} <strong className="text-[#14283f]">{item.value}</strong></span>)}</div></Card></div><Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)]"><CardHeader className="pb-1"><CardTitle className="font-display text-lg">Destinos mais frequentes</CardTitle><p className="text-xs text-[#75827f] mt-1">Top 6 por quantidade de deslocamentos</p></CardHeader><CardContent className="h-[260px] pt-4"><ResponsiveContainer width="100%" height="100%"><BarChart data={destinationData} layout="vertical" margin={{ top: 0, right: 25, left: 15, bottom: 0 }}><CartesianGrid horizontal={false} stroke="#edf1ed" /><XAxis type="number" allowDecimals={false} tick={{ fontSize: 10, fill: "#8b9793" }} tickLine={false} axisLine={false} /><YAxis type="category" dataKey="name" width={125} tick={{ fontSize: 11, fill: "#53635f" }} tickLine={false} axisLine={false} /><Tooltip contentStyle={{ border: "1px solid #e1e8e2", borderRadius: 12, fontSize: 12 }} /><Bar dataKey="total" fill="#4f8f77" radius={[0, 6, 6, 0]} barSize={22} /></BarChart></ResponsiveContainer></CardContent></Card></section>}
+        {tab === "gráficos" && (
+          <section className="mt-6 space-y-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
+              <StatCard
+                label="Viagens no período"
+                value={filteredTrips.length.toLocaleString("pt-BR")}
+                detail={`${completedTrips} concluídas`}
+                icon={MapPin}
+                accent="bg-[#e4684d]"
+              />
+              <StatCard
+                label="Destinos atendidos"
+                value={uniqueDestinations.toLocaleString("pt-BR")}
+                detail="localidades distintas"
+                icon={MapPin}
+                accent="bg-[#4f8f77]"
+              />
+              <StatCard
+                label="Veículos utilizados"
+                value={uniqueVehicles.toLocaleString("pt-BR")}
+                detail="placas distintas"
+                icon={CarFront}
+                accent="bg-[#e5b74f]"
+              />
+              <StatCard
+                label="Motoristas ativos"
+                value={uniqueDrivers.toLocaleString("pt-BR")}
+                detail="no recorte atual"
+                icon={Users}
+                accent="bg-[#7194b0]"
+              />
+            </div>
+            <div className="grid lg:grid-cols-[1.6fr_1fr] gap-5">
+              <Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)]">
+                <CardHeader className="flex flex-row items-center justify-between pb-1">
+                  <div>
+                    <CardTitle className="font-display text-lg">
+                      Ritmo de viagens
+                    </CardTitle>
+                    <p className="text-xs text-[#75827f] mt-1">
+                      Volume mensal das 52 abas
+                    </p>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className="border-[#dce5de] text-[#4f8f77]"
+                  >
+                    52 meses
+                  </Badge>
+                </CardHeader>
+                <CardContent className="h-[295px] pt-5">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart
+                      data={monthData}
+                      margin={{ top: 5, right: 10, left: -25, bottom: 0 }}
+                    >
+                      <defs>
+                        <linearGradient
+                          id="tripsFill"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="0%"
+                            stopColor="#e4684d"
+                            stopOpacity={0.25}
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor="#e4684d"
+                            stopOpacity={0}
+                          />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid vertical={false} stroke="#edf1ed" />
+                      <XAxis
+                        dataKey="month"
+                        tick={{ fontSize: 10, fill: "#8b9793" }}
+                        tickLine={false}
+                        axisLine={false}
+                        interval="preserveStartEnd"
+                      />
+                      <YAxis
+                        allowDecimals={false}
+                        tick={{ fontSize: 10, fill: "#8b9793" }}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          border: "1px solid #e1e8e2",
+                          borderRadius: 12,
+                          fontSize: 12,
+                        }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="viagens"
+                        stroke="#e4684d"
+                        strokeWidth={2.5}
+                        fill="url(#tripsFill)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+              <Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)]">
+                <CardHeader className="pb-1">
+                  <CardTitle className="font-display text-lg">
+                    Situação das viagens
+                  </CardTitle>
+                  <p className="text-xs text-[#75827f] mt-1">
+                    Distribuição por status
+                  </p>
+                </CardHeader>
+                <CardContent className="h-[295px] flex items-center">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={statusData}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="47%"
+                        innerRadius={65}
+                        outerRadius={93}
+                        paddingAngle={4}
+                        stroke="none"
+                      >
+                        {statusData.map((entry, index) => (
+                          <Cell
+                            key={entry.name}
+                            fill={COLORS[index % COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={{
+                          border: "1px solid #e1e8e2",
+                          borderRadius: 12,
+                          fontSize: 12,
+                        }}
+                      />
+                      <text
+                        x="50%"
+                        y="45%"
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        className="fill-[#14283f]"
+                        fontSize="26"
+                        fontWeight="700"
+                      >
+                        {filteredTrips.length}
+                      </text>
+                      <text
+                        x="50%"
+                        y="56%"
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                        className="fill-[#75827f]"
+                        fontSize="10"
+                      >
+                        viagens
+                      </text>
+                    </PieChart>
+                  </ResponsiveContainer>
+                </CardContent>
+                <div className="px-6 pb-5 flex justify-center flex-wrap gap-x-4 gap-y-2">
+                  {statusData.map((item, index) => (
+                    <span
+                      key={item.name}
+                      className="flex items-center gap-1.5 text-[11px] text-[#75827f]"
+                    >
+                      <i
+                        className="h-2 w-2 rounded-full"
+                        style={{
+                          backgroundColor: COLORS[index % COLORS.length],
+                        }}
+                      />
+                      {item.name}{" "}
+                      <strong className="text-[#14283f]">{item.value}</strong>
+                    </span>
+                  ))}
+                </div>
+              </Card>
+            </div>
+            <Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)]">
+              <CardHeader className="pb-1">
+                <CardTitle className="font-display text-lg">
+                  Destinos mais frequentes
+                </CardTitle>
+                <p className="text-xs text-[#75827f] mt-1">
+                  Top 6 por quantidade de deslocamentos
+                </p>
+              </CardHeader>
+              <CardContent className="h-[260px] pt-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={destinationData}
+                    layout="vertical"
+                    margin={{ top: 0, right: 25, left: 15, bottom: 0 }}
+                  >
+                    <CartesianGrid horizontal={false} stroke="#edf1ed" />
+                    <XAxis
+                      type="number"
+                      allowDecimals={false}
+                      tick={{ fontSize: 10, fill: "#8b9793" }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="name"
+                      width={125}
+                      tick={{ fontSize: 11, fill: "#53635f" }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        border: "1px solid #e1e8e2",
+                        borderRadius: 12,
+                        fontSize: 12,
+                      }}
+                    />
+                    <Bar
+                      dataKey="total"
+                      fill="#4f8f77"
+                      radius={[0, 6, 6, 0]}
+                      barSize={22}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </section>
+        )}
 
-    {tab === "viagens" && <section className="mt-6"><div className="no-print flex flex-wrap items-center justify-between gap-3 mb-4"><div className="relative w-full sm:w-80"><Search className="absolute left-3 top-2.5 h-4 w-4 text-[#9aa6a2]" /><Input value={tripSearch} onChange={e => setTripSearch(e.target.value)} placeholder="Buscar viagem, placa ou destino…" className="pl-9 bg-white border-[#dce5de]" /></div><div className="flex items-center gap-2"><span className="text-xs text-[#75827f]">{filteredTrips.length} registros mensais</span><div className="flex rounded-lg border border-[#dce5de] bg-white p-1"><button onClick={() => setTripView("table")} className={`rounded-md p-1.5 ${tripView === "table" ? "bg-[#14283f] text-white" : "text-[#75827f]"}`}><LayoutDashboard className="h-4 w-4" /></button><button onClick={() => setTripView("cards")} className={`rounded-md p-1.5 ${tripView === "cards" ? "bg-[#14283f] text-white" : "text-[#75827f]"}`}><Menu className="h-4 w-4" /></button></div></div></div>{tripView === "table" ? <Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)] overflow-hidden"><div className="overflow-x-auto"><table className="w-full text-left"><thead className="bg-[#f7f9f6] border-b border-[#e5ebe5]"><tr><SortHeader label="Data" sortKey="tripDate" sort={tripSort} onSort={key => setTripSort(current => nextSort(current, key))} /><SortHeader label="Aba mensal" sortKey="sourceSheet" sort={tripSort} onSort={key => setTripSort(current => nextSort(current, key))} /><SortHeader label="Veículo" sortKey="vehiclePlate" sort={tripSort} onSort={key => setTripSort(current => nextSort(current, key))} /><SortHeader label="Motorista" sortKey="driverName" sort={tripSort} onSort={key => setTripSort(current => nextSort(current, key))} /><SortHeader label="Destino" sortKey="destination" sort={tripSort} onSort={key => setTripSort(current => nextSort(current, key))} /><SortHeader label="Ação" sortKey="purpose" sort={tripSort} onSort={key => setTripSort(current => nextSort(current, key))} /></tr></thead><tbody className="divide-y divide-[#edf1ed]">{filteredTrips.map(trip => <tr key={trip.id} className="hover:bg-[#fbfcfa] transition-colors"><td className="px-4 py-4 text-sm font-semibold whitespace-nowrap">{formatDate(trip.tripDate)}</td><td className="px-4 py-4 text-xs text-[#4f8f77] whitespace-nowrap">{trip.sourceSheet || "—"}</td><td className="px-4 py-4 whitespace-nowrap"><p className="text-sm font-semibold">{trip.vehiclePlate}</p><p className="text-[11px] text-[#75827f]">{trip.vehicleModel || "Modelo não informado"}</p></td><td className="px-4 py-4 text-sm whitespace-nowrap">{trip.driverName}</td><td className="px-4 py-4 text-sm min-w-[170px]">{trip.destination || "—"}</td><td className="px-4 py-4 text-sm text-[#61716d] min-w-[220px]">{trip.purpose || "—"}</td></tr>)}{filteredTrips.length === 0 && <tr><td colSpan={6} className="p-12 text-center text-sm text-[#75827f]">Nenhuma viagem encontrada com os filtros atuais.</td></tr>}</tbody></table></div></Card> : <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">{filteredTrips.map(trip => <Card key={trip.id} className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)]"><CardContent className="p-5"><div className="flex items-center justify-between"><span className="text-xs font-semibold text-[#75827f]">{formatDate(trip.tripDate)} · {trip.sourceSheet}</span><Badge className="bg-[#e8f3ec] text-[#317154] hover:bg-[#e8f3ec]">Planejada</Badge></div><div className="mt-5 flex items-start gap-3"><div className="h-10 w-10 rounded-xl bg-[#eef4f0] flex items-center justify-center text-[#4f8f77]"><CarFront className="h-5 w-5" /></div><div><p className="font-display font-bold">{trip.vehiclePlate}</p><p className="text-xs text-[#75827f]">{trip.driverName}</p></div></div><div className="mt-5 border-t border-[#edf1ed] pt-4"><p className="text-sm">{trip.destination || "Destino não informado"}</p><p className="text-xs text-[#61716d] mt-2">{trip.purpose || "Sem ação informada"}</p></div></CardContent></Card>)}</div>}</section>}
+        {tab === "viagens" && (
+          <section className="mt-6">
+            <div className="no-print flex flex-wrap items-center justify-between gap-3 mb-4">
+              <div className="relative w-full sm:w-80">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-[#9aa6a2]" />
+                <Input
+                  value={tripSearch}
+                  onChange={e => setTripSearch(e.target.value)}
+                  placeholder="Buscar viagem, placa ou destino…"
+                  className="pl-9 bg-white border-[#dce5de]"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-[#75827f]">
+                  {filteredTrips.length} registros mensais
+                </span>
+                <div className="flex rounded-lg border border-[#dce5de] bg-white p-1">
+                  <button
+                    onClick={() => setTripView("table")}
+                    className={`rounded-md p-1.5 ${tripView === "table" ? "bg-[#14283f] text-white" : "text-[#75827f]"}`}
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => setTripView("cards")}
+                    className={`rounded-md p-1.5 ${tripView === "cards" ? "bg-[#14283f] text-white" : "text-[#75827f]"}`}
+                  >
+                    <Menu className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+            {tripView === "table" ? (
+              <Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)] overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead className="bg-[#f7f9f6] border-b border-[#e5ebe5]">
+                      <tr>
+                        <SortHeader
+                          label="Data"
+                          sortKey="tripDate"
+                          sort={tripSort}
+                          onSort={key =>
+                            setTripSort(current => nextSort(current, key))
+                          }
+                        />
+                        <SortHeader
+                          label="Aba mensal"
+                          sortKey="sourceSheet"
+                          sort={tripSort}
+                          onSort={key =>
+                            setTripSort(current => nextSort(current, key))
+                          }
+                        />
+                        <SortHeader
+                          label="Veículo"
+                          sortKey="vehiclePlate"
+                          sort={tripSort}
+                          onSort={key =>
+                            setTripSort(current => nextSort(current, key))
+                          }
+                        />
+                        <SortHeader
+                          label="Motorista"
+                          sortKey="driverName"
+                          sort={tripSort}
+                          onSort={key =>
+                            setTripSort(current => nextSort(current, key))
+                          }
+                        />
+                        <SortHeader
+                          label="Destino"
+                          sortKey="destination"
+                          sort={tripSort}
+                          onSort={key =>
+                            setTripSort(current => nextSort(current, key))
+                          }
+                        />
+                        <SortHeader
+                          label="Ação"
+                          sortKey="purpose"
+                          sort={tripSort}
+                          onSort={key =>
+                            setTripSort(current => nextSort(current, key))
+                          }
+                        />
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#edf1ed]">
+                      {filteredTrips.map(trip => (
+                        <tr
+                          key={trip.id}
+                          className="hover:bg-[#fbfcfa] transition-colors"
+                        >
+                          <td className="px-4 py-4 text-sm font-semibold whitespace-nowrap">
+                            {formatDate(trip.tripDate)}
+                          </td>
+                          <td className="px-4 py-4 text-xs text-[#4f8f77] whitespace-nowrap">
+                            {trip.sourceSheet || "—"}
+                          </td>
+                          <td className="px-4 py-4 whitespace-nowrap">
+                            <p className="text-sm font-semibold">
+                              {trip.vehiclePlate}
+                            </p>
+                            <p className="text-[11px] text-[#75827f]">
+                              {trip.vehicleModel || "Modelo não informado"}
+                            </p>
+                          </td>
+                          <td className="px-4 py-4 text-sm whitespace-nowrap">
+                            {trip.driverName}
+                          </td>
+                          <td className="px-4 py-4 text-sm min-w-[170px]">
+                            {trip.destination || "—"}
+                          </td>
+                          <td className="px-4 py-4 text-sm text-[#61716d] min-w-[220px]">
+                            {trip.purpose || "—"}
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredTrips.length === 0 && (
+                        <tr>
+                          <td
+                            colSpan={6}
+                            className="p-12 text-center text-sm text-[#75827f]"
+                          >
+                            Nenhuma viagem encontrada com os filtros atuais.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            ) : (
+              <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {filteredTrips.map(trip => (
+                  <Card
+                    key={trip.id}
+                    className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)]"
+                  >
+                    <CardContent className="p-5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-[#75827f]">
+                          {formatDate(trip.tripDate)} · {trip.sourceSheet}
+                        </span>
+                        <Badge className="bg-[#e8f3ec] text-[#317154] hover:bg-[#e8f3ec]">
+                          Planejada
+                        </Badge>
+                      </div>
+                      <div className="mt-5 flex items-start gap-3">
+                        <div className="h-10 w-10 rounded-xl bg-[#eef4f0] flex items-center justify-center text-[#4f8f77]">
+                          <CarFront className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="font-display font-bold">
+                            {trip.vehiclePlate}
+                          </p>
+                          <p className="text-xs text-[#75827f]">
+                            {trip.driverName}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="mt-5 border-t border-[#edf1ed] pt-4">
+                        <p className="text-sm">
+                          {trip.destination || "Destino não informado"}
+                        </p>
+                        <p className="text-xs text-[#61716d] mt-2">
+                          {trip.purpose || "Sem ação informada"}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
-    {tab === "veículos" && <section className="mt-6"><div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">{vehicleCards.map(item => { const itemTrips = vehicleFilteredTrips.filter(t => t.vehiclePlate === item.plate); const itemRecords = vehicleFilteredRecords.filter(r => r.vehiclePlate === item.plate); return <button key={item.plate} onClick={() => setSelectedVehicle(item)} className="text-left group"><Card className="print-card h-full border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)] group-hover:-translate-y-1 group-hover:shadow-[0_14px_30px_rgba(20,40,63,0.11)] transition-all overflow-hidden"><div className="h-2 bg-[#4f8f77] group-hover:bg-[#e4684d] transition-colors" /><CardContent className="p-5"><div className="flex justify-between items-start"><div className="h-12 w-12 rounded-2xl bg-[#eef4f0] flex items-center justify-center text-[#4f8f77]"><CarFront className="h-6 w-6" /></div><Badge className="bg-[#e8f3ec] text-[#317154] hover:bg-[#e8f3ec]">Ativo</Badge></div><p className="font-display font-bold text-xl mt-5 tracking-wide">{item.plate}</p><p className="text-sm text-[#61716d] mt-1">{item.model || "Modelo não informado"}</p><div className="grid grid-cols-2 gap-3 border-t border-[#edf1ed] mt-5 pt-4"><div><p className="text-[10px] uppercase tracking-[0.1em] text-[#8a9692]">Mensais</p><p className="font-semibold mt-1">{itemTrips.length}</p></div><div><p className="text-[10px] uppercase tracking-[0.1em] text-[#8a9692]">Registros</p><p className="font-semibold mt-1">{itemRecords.length}</p></div></div><p className="text-xs text-[#4f8f77] mt-4 font-semibold">Ver histórico das duas fontes →</p></CardContent></Card></button>; })}</div>{vehicleCards.length === 0 && <EmptyState icon={CarFront} title="Nenhum veículo cadastrado" detail="Importe os dados para começar a acompanhar a frota." />}</section>}
+        {tab === "veículos" && (
+          <section className="mt-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {vehicleCards.map(item => {
+                const itemTrips = vehicleFilteredTrips.filter(
+                  t => t.vehiclePlate === item.plate
+                );
+                const itemRecords = vehicleFilteredRecords.filter(
+                  r => r.vehiclePlate === item.plate
+                );
+                return (
+                  <button
+                    key={item.plate}
+                    onClick={() => setSelectedVehicle(item)}
+                    className="text-left group"
+                  >
+                    <Card className="print-card h-full border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)] group-hover:-translate-y-1 group-hover:shadow-[0_14px_30px_rgba(20,40,63,0.11)] transition-all overflow-hidden">
+                      <div className="h-2 bg-[#4f8f77] group-hover:bg-[#e4684d] transition-colors" />
+                      <CardContent className="p-5">
+                        <div className="flex justify-between items-start">
+                          <div className="h-12 w-12 rounded-2xl bg-[#eef4f0] flex items-center justify-center text-[#4f8f77]">
+                            <CarFront className="h-6 w-6" />
+                          </div>
+                          <Badge className="bg-[#e8f3ec] text-[#317154] hover:bg-[#e8f3ec]">
+                            Ativo
+                          </Badge>
+                        </div>
+                        <p className="font-display font-bold text-xl mt-5 tracking-wide">
+                          {item.plate}
+                        </p>
+                        <p className="text-sm text-[#61716d] mt-1">
+                          {item.model || "Modelo não informado"}
+                        </p>
+                        <div className="grid grid-cols-2 gap-3 border-t border-[#edf1ed] mt-5 pt-4">
+                          <div>
+                            <p className="text-[10px] uppercase tracking-[0.1em] text-[#8a9692]">
+                              Mensais
+                            </p>
+                            <p className="font-semibold mt-1">
+                              {itemTrips.length}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-[10px] uppercase tracking-[0.1em] text-[#8a9692]">
+                              Registros
+                            </p>
+                            <p className="font-semibold mt-1">
+                              {itemRecords.length}
+                            </p>
+                          </div>
+                        </div>
+                        <p className="text-xs text-[#4f8f77] mt-4 font-semibold">
+                          Ver histórico das duas fontes →
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </button>
+                );
+              })}
+            </div>
+            {vehicleCards.length === 0 && (
+              <EmptyState
+                icon={CarFront}
+                title="Nenhum veículo cadastrado"
+                detail="Importe os dados para começar a acompanhar a frota."
+              />
+            )}
+          </section>
+        )}
 
-    {tab === "registros" && <section className="mt-6"><div className="no-print flex items-center justify-between gap-3 mb-4"><p className="text-xs text-[#75827f]">{filteredRecords.length.toLocaleString("pt-BR")} viagens consolidadas <span className="text-[#a0aaa6]">({rawRecords.length.toLocaleString("pt-BR")} checklists)</span></p><span className="text-xs text-[#75827f]">Saída + chegada por veículo</span></div><Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)] overflow-hidden"><table className="w-full table-fixed text-left"><colgroup><col className="w-[10%]" /><col className="w-[10%]" /><col className="w-[12%]" /><col className="w-[13%]" /><col className="w-[10%]" /><col className="w-[18%]" /><col className="w-[8%]" /><col className="w-[8%]" /><col className="w-[7%]" /><col className="w-[10%]" /></colgroup><thead className="bg-[#f7f9f6] border-b border-[#e5ebe5]"><tr><SortHeader label="Saída" sortKey="recordedAt" sort={recordSort} onSort={key => setRecordSort(current => nextSort(current, key))} /><th className="px-2 py-3 text-[10px] uppercase tracking-[0.08em] text-[#75827f] font-bold">Chegada</th><SortHeader label="Veículo" sortKey="vehiclePlate" sort={recordSort} onSort={key => setRecordSort(current => nextSort(current, key))} /><SortHeader label="Atividade" sortKey="event" sort={recordSort} onSort={key => setRecordSort(current => nextSort(current, key))} /><th className="px-2 py-3 text-[10px] uppercase tracking-[0.08em] text-[#75827f] font-bold">Matrícula</th><SortHeader label="Responsável" sortKey="respondentName" sort={recordSort} onSort={key => setRecordSort(current => nextSort(current, key))} /><th className="px-2 py-3 text-[10px] uppercase tracking-[0.08em] text-[#75827f] font-bold">Km saída</th><th className="px-2 py-3 text-[10px] uppercase tracking-[0.08em] text-[#75827f] font-bold">Km chegada</th><SortHeader label="Atendimento" sortKey="serviceType" sort={recordSort} onSort={key => setRecordSort(current => nextSort(current, key))} /><th className="px-2 py-3 text-[10px] uppercase tracking-[0.08em] text-[#75827f] font-bold">Condição</th></tr></thead><tbody className="divide-y divide-[#edf1ed]">{filteredRecords.map(record => { const arrival = record.arrival; const departureDate = record.recordMode === "arrival" ? null : record.recordedAt; const arrivalDate = record.recordMode === "departure" ? null : record.recordMode === "arrival" ? record.recordedAt : arrival?.recordedAt; return <tr key={record.id} className="hover:bg-[#fbfcfa] align-top"><td className="px-2 py-3 text-xs font-semibold break-words">{formatDateTime(departureDate)}</td><td className="px-2 py-3 text-xs break-words">{formatDateTime(arrivalDate)}</td><td className="px-2 py-3 text-xs font-semibold break-words">{record.vehiclePlate}</td><td className="px-2 py-3 text-xs break-words"><span className={record.recordMode === "paired" ? "text-[#317154] font-semibold" : "text-[#b54e3c]"}>{record.event || "—"}</span></td><td className="px-2 py-3 text-xs break-words">{record.employeeId || arrival?.employeeId || "—"}{arrival?.employeeId && record.employeeId && arrival.employeeId !== record.employeeId && <><br /><span className="text-[#b54e3c]">→ {arrival.employeeId}</span></>}</td><td className="px-2 py-3 text-xs break-words">{record.respondentName || arrival?.respondentName || "Não informado"}{arrival?.respondentName && record.respondentName && arrival.respondentName !== record.respondentName && <><br /><span className="text-[#b54e3c]">→ {arrival.respondentName}</span></>}</td><td className="px-2 py-3 text-xs">{record.kmInitial || "—"}</td><td className="px-2 py-3 text-xs">{arrival?.kmFinal || (record.recordMode === "arrival" ? record.kmFinal : "—")}</td><td className="px-2 py-3 text-xs break-words"><div>{record.serviceType || "—"}</div>{record.summary && <div className="mt-1 text-[#61716d]">{record.summary}</div>}{record.email && <div className="mt-1 text-[10px] text-[#8a9692]">{record.email}</div>}</td><td className="px-2 py-3 text-xs break-words"><div>{arrival?.vehicleCondition || record.vehicleCondition || "—"}</div>{record.fuelLevel && <div className="mt-1 text-[#61716d]">Combustível: {record.fuelLevel}</div>}{record.irregularity && <div className="mt-1 text-[#b54e3c]">Irregularidade: {record.irregularity}</div>}{record.declaration && <div className="mt-1 text-[#61716d]">{record.declaration}</div>}</td></tr>; })}{filteredRecords.length === 0 && <tr><td colSpan={10} className="p-12 text-center text-sm text-[#75827f]">Nenhum registro encontrado com os filtros atuais.</td></tr>}</tbody></table></Card></section>}
+        {tab === "registros" && (
+          <section className="mt-6">
+            <div className="no-print flex items-center justify-between gap-3 mb-4">
+              <p className="text-xs text-[#75827f]">
+                {filteredRecords.length.toLocaleString("pt-BR")} viagens
+                consolidadas{" "}
+                <span className="text-[#a0aaa6]">
+                  ({rawRecords.length.toLocaleString("pt-BR")} checklists)
+                </span>
+              </p>
+              <span className="text-xs text-[#75827f]">
+                Saída + chegada por veículo
+              </span>
+            </div>
+            <Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)] overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[1080px] table-fixed text-left">
+                  <colgroup>
+                    <col className="w-[9%]" />
+                    <col className="w-[9%]" />
+                    <col className="w-[9%]" />
+                    <col className="w-[11%]" />
+                    <col className="w-[8%]" />
+                    <col className="w-[11%]" />
+                    <col className="w-[7%]" />
+                    <col className="w-[7%]" />
+                    <col className="w-[16%]" />
+                    <col className="w-[13%]" />
+                  </colgroup>
+                  <thead className="bg-[#f7f9f6] border-b border-[#e5ebe5]">
+                    <tr>
+                      <SortHeader
+                        label="Saída"
+                        sortKey="recordedAt"
+                        sort={recordSort}
+                        onSort={key =>
+                          setRecordSort(current => nextSort(current, key))
+                        }
+                      />
+                      <th className="px-2 py-3 text-[10px] uppercase tracking-[0.08em] text-[#75827f] font-bold">
+                        Chegada
+                      </th>
+                      <SortHeader
+                        label="Veículo"
+                        sortKey="vehiclePlate"
+                        sort={recordSort}
+                        onSort={key =>
+                          setRecordSort(current => nextSort(current, key))
+                        }
+                      />
+                      <SortHeader
+                        label="Atividade"
+                        sortKey="event"
+                        sort={recordSort}
+                        onSort={key =>
+                          setRecordSort(current => nextSort(current, key))
+                        }
+                      />
+                      <th className="px-2 py-3 text-[10px] uppercase tracking-[0.08em] text-[#75827f] font-bold">
+                        Matrícula
+                      </th>
+                      <SortHeader
+                        label="Responsável"
+                        sortKey="respondentName"
+                        sort={recordSort}
+                        onSort={key =>
+                          setRecordSort(current => nextSort(current, key))
+                        }
+                      />
+                      <th className="px-2 py-3 text-[10px] uppercase tracking-[0.08em] text-[#75827f] font-bold">
+                        Km saída
+                      </th>
+                      <th className="px-2 py-3 text-[10px] uppercase tracking-[0.08em] text-[#75827f] font-bold">
+                        Km chegada
+                      </th>
+                      <SortHeader
+                        label="Atendimento"
+                        sortKey="serviceType"
+                        sort={recordSort}
+                        onSort={key =>
+                          setRecordSort(current => nextSort(current, key))
+                        }
+                      />
+                      <th className="px-2 py-3 text-[10px] uppercase tracking-[0.08em] text-[#75827f] font-bold">
+                        Condição
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#edf1ed]">
+                    {filteredRecords.map(record => {
+                      const arrival = record.arrival;
+                      const departureDate =
+                        record.recordMode === "arrival"
+                          ? null
+                          : record.recordedAt;
+                      const arrivalDate =
+                        record.recordMode === "departure"
+                          ? null
+                          : record.recordMode === "arrival"
+                            ? record.recordedAt
+                            : arrival?.recordedAt;
+                      return (
+                        <tr
+                          key={record.id}
+                          className="cursor-pointer align-top transition-colors hover:bg-[#eef4f0] focus:bg-[#eef4f0] focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#4f8f77]"
+                          role="button"
+                          tabIndex={0}
+                          aria-label={`Abrir detalhes do registro do veículo ${record.vehiclePlate}`}
+                          onClick={() => setSelectedRecord(record)}
+                          onKeyDown={event => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              setSelectedRecord(record);
+                            }
+                          }}
+                        >
+                          <td className="px-2 py-3 text-xs font-semibold align-top">
+                            {truncateText(formatDateTime(departureDate), 22)}
+                          </td>
+                          <td className="px-2 py-3 text-xs align-top">
+                            {truncateText(formatDateTime(arrivalDate), 22)}
+                          </td>
+                          <td className="px-2 py-3 text-xs font-semibold align-top">
+                            <span title={record.vehiclePlate}>
+                              {truncateText(record.vehiclePlate, 14)}
+                            </span>
+                          </td>
+                          <td className="px-2 py-3 text-xs align-top">
+                            <span
+                              title={record.event || undefined}
+                              className={
+                                record.recordMode === "paired"
+                                  ? "text-[#317154] font-semibold"
+                                  : "text-[#b54e3c]"
+                              }
+                            >
+                              {truncateText(record.event, 24)}
+                            </span>
+                          </td>
+                          <td className="px-2 py-3 text-xs align-top">
+                            <span
+                              title={
+                                record.employeeId ||
+                                arrival?.employeeId ||
+                                undefined
+                              }
+                            >
+                              {truncateText(
+                                record.employeeId || arrival?.employeeId,
+                                16
+                              )}
+                            </span>
+                            {arrival?.employeeId &&
+                              record.employeeId &&
+                              arrival.employeeId !== record.employeeId && (
+                                <>
+                                  <br />
+                                  <span
+                                    className="text-[#b54e3c]"
+                                    title={arrival.employeeId}
+                                  >
+                                    → {truncateText(arrival.employeeId, 16)}
+                                  </span>
+                                </>
+                              )}
+                          </td>
+                          <td className="px-2 py-3 text-xs align-top">
+                            <span
+                              title={
+                                record.respondentName ||
+                                arrival?.respondentName ||
+                                undefined
+                              }
+                            >
+                              {truncateText(
+                                record.respondentName ||
+                                  arrival?.respondentName ||
+                                  "Não informado",
+                                22
+                              )}
+                            </span>
+                            {arrival?.respondentName &&
+                              record.respondentName &&
+                              arrival.respondentName !==
+                                record.respondentName && (
+                                <>
+                                  <br />
+                                  <span
+                                    className="text-[#b54e3c]"
+                                    title={arrival.respondentName}
+                                  >
+                                    → {truncateText(arrival.respondentName, 22)}
+                                  </span>
+                                </>
+                              )}
+                          </td>
+                          <td className="px-2 py-3 text-xs align-top">
+                            {record.kmInitial || "—"}
+                          </td>
+                          <td className="px-2 py-3 text-xs align-top">
+                            {arrival?.kmFinal ||
+                              (record.recordMode === "arrival"
+                                ? record.kmFinal
+                                : "—")}
+                          </td>
+                          <td className="px-2 py-3 text-xs align-top">
+                            <div title={record.serviceType || undefined}>
+                              {truncateText(record.serviceType, 38)}
+                            </div>
+                            {record.summary && (
+                              <div
+                                className="mt-1 text-[#61716d]"
+                                title={record.summary}
+                              >
+                                {truncateText(record.summary, 44)}
+                              </div>
+                            )}
+                            {record.email && (
+                              <div
+                                className="mt-1 text-[10px] text-[#8a9692]"
+                                title={record.email}
+                              >
+                                {truncateText(record.email, 30)}
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-2 py-3 text-xs align-top">
+                            <div
+                              title={
+                                arrival?.vehicleCondition ||
+                                record.vehicleCondition ||
+                                undefined
+                              }
+                            >
+                              {truncateText(
+                                arrival?.vehicleCondition ||
+                                  record.vehicleCondition,
+                                34
+                              )}
+                            </div>
+                            {record.fuelLevel && (
+                              <div
+                                className="mt-1 text-[#61716d]"
+                                title={record.fuelLevel}
+                              >
+                                Combustível:{" "}
+                                {truncateText(record.fuelLevel, 24)}
+                              </div>
+                            )}
+                            {record.irregularity && (
+                              <div
+                                className="mt-1 text-[#b54e3c]"
+                                title={record.irregularity}
+                              >
+                                Irregularidade:{" "}
+                                {truncateText(record.irregularity, 36)}
+                              </div>
+                            )}
+                            {record.declaration && (
+                              <div
+                                className="mt-1 text-[#61716d]"
+                                title={record.declaration}
+                              >
+                                {truncateText(record.declaration, 36)}
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {filteredRecords.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan={10}
+                          className="p-12 text-center text-sm text-[#75827f]"
+                        >
+                          Nenhum registro encontrado com os filtros atuais.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          </section>
+        )}
 
-    {tab === "equipe" && <section className="mt-6">{user?.role !== "admin" ? <Card className="border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)]"><CardContent className="p-12 text-center"><ShieldCheck className="h-10 w-10 text-[#e5b74f] mx-auto" /><h3 className="font-display font-bold text-xl mt-4">Área restrita</h3><p className="text-sm text-[#75827f] mt-2">A visualização da equipe está disponível apenas para administradores.</p></CardContent></Card> : <><div className="flex items-center justify-between mb-4"><p className="text-sm text-[#75827f]"><strong className="text-[#14283f]">{team.length}</strong> usuários com permissão de acesso</p><div className="flex gap-2"><Button onClick={() => setMemberDialog(true)} className="no-print bg-[#e4684d] hover:bg-[#c9533b] text-white gap-2"><UserPlus className="h-4 w-4" />Adicionar Membro</Button><Button onClick={() => visitorMutation.mutate({ enabled: visitorAccessQuery.data !== true })} disabled={visitorMutation.isPending} variant="outline" className={`no-print gap-2 ${visitorAccessQuery.data ? "border-[#b9d8c4] bg-[#e8f3ec] text-[#317154]" : "border-[#f0c7bd] bg-[#fff0eb] text-[#b54e3c]"}`}><span className={`h-2 w-2 rounded-full ${visitorAccessQuery.data ? "bg-[#4f8f77]" : "bg-[#e4684d]"}`} />Visitantes: {visitorAccessQuery.data ? "Ativo" : "Inativo"}</Button><PrintButton label="Imprimir equipe" /></div></div><Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)] overflow-hidden"><div className="overflow-x-auto"><table className="w-full text-left"><thead className="bg-[#f7f9f6] border-b border-[#e5ebe5]"><tr>{["Usuário", "E-mail", "Permissão", "Último acesso", "Cadastrado em", "Ações"].map(head => <th key={head} className="px-5 py-3 text-[10px] uppercase tracking-[0.12em] text-[#75827f] font-bold">{head}</th>)}</tr></thead><tbody className="divide-y divide-[#edf1ed]">{team.map(member => <tr key={member.id} className="hover:bg-[#fbfcfa]"><td className="px-5 py-4"><div className="flex items-center gap-3"><Avatar className="h-9 w-9"><AvatarFallback className={member.role === "admin" ? "bg-[#fff0eb] text-[#b54e3c] text-xs font-bold" : "bg-[#e8f3ec] text-[#317154] text-xs font-bold"}>{initials(member.name)}</AvatarFallback></Avatar><span className="font-semibold text-sm">{member.name || "Sem nome"}</span></div></td><td className="px-5 py-4 text-sm text-[#61716d]">{member.email || "—"}</td><td className="px-5 py-4"><span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${member.role === "admin" ? "bg-[#fff0eb] text-[#b54e3c]" : "bg-[#e8f3ec] text-[#317154]"}`}>{member.role === "admin" && <ShieldCheck className="h-3 w-3" />}{member.role === "admin" ? "Administrador" : "Usuário"}</span></td><td className="px-5 py-4 text-sm text-[#61716d]">{formatDateTime(member.lastSignedIn)}</td><td className="px-5 py-4 text-sm text-[#61716d]">{formatDate(member.createdAt)}</td><td className="px-5 py-4"><div className="flex items-center gap-1"><Button type="button" variant="outline" size="sm" title={member.active !== 0 ? "Inativar usuário" : "Ativar usuário"} className={`no-print h-8 px-2 text-[11px] gap-1 ${member.active !== 0 ? "border-[#b9d8c4] bg-[#e8f3ec] text-[#317154]" : "border-[#f0c7bd] bg-[#fff0eb] text-[#b54e3c]"}`} disabled={member.id === user?.id || setActiveMutation.isPending} onClick={() => setActiveMutation.mutate({ id: member.id, active: member.active === 0 })}><span className={`h-1.5 w-1.5 rounded-full ${member.active !== 0 ? "bg-[#4f8f77]" : "bg-[#e4684d]"}`} />{member.active !== 0 ? "Ativo" : "Inativo"}</Button><Button type="button" variant="ghost" size="icon" title="Editar membro" className="no-print h-8 w-8 text-[#4f8f77] hover:bg-[#e8f3ec]" onClick={() => { setEditingId(member.id); setMemberName(member.name || ""); setMemberEmail(member.email || ""); setMemberRole(member.role); setMemberDialog(true); }}><Pencil className="h-4 w-4" /></Button><Button type="button" variant="ghost" size="icon" title="Excluir membro" className="no-print h-8 w-8 text-[#b54e3c] hover:bg-[#fff0eb]" disabled={member.id === user?.id || removeMemberMutation.isPending} onClick={() => { if (window.confirm(`Excluir ${member.name || member.email || "este membro"}?`)) removeMemberMutation.mutate({ id: member.id }); }}><Trash2 className="h-4 w-4" /></Button></div></td></tr>)}{team.length === 0 && <tr><td colSpan={6} className="p-12 text-center text-sm text-[#75827f]">Nenhum usuário adicional encontrado ainda.</td></tr>}</tbody></table></div></Card></>}</section>}
-    </main>
+        {tab === "equipe" && (
+          <section className="mt-6">
+            {user?.role !== "admin" ? (
+              <Card className="border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)]">
+                <CardContent className="p-12 text-center">
+                  <ShieldCheck className="h-10 w-10 text-[#e5b74f] mx-auto" />
+                  <h3 className="font-display font-bold text-xl mt-4">
+                    Área restrita
+                  </h3>
+                  <p className="text-sm text-[#75827f] mt-2">
+                    A visualização da equipe está disponível apenas para
+                    administradores.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <p className="text-sm text-[#75827f]">
+                    <strong className="text-[#14283f]">{team.length}</strong>{" "}
+                    usuários com permissão de acesso
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => setMemberDialog(true)}
+                      className="no-print bg-[#e4684d] hover:bg-[#c9533b] text-white gap-2"
+                    >
+                      <UserPlus className="h-4 w-4" />
+                      Adicionar Membro
+                    </Button>
+                    <Button
+                      onClick={() =>
+                        visitorMutation.mutate({
+                          enabled: visitorAccessQuery.data !== true,
+                        })
+                      }
+                      disabled={visitorMutation.isPending}
+                      variant="outline"
+                      className={`no-print gap-2 ${visitorAccessQuery.data ? "border-[#b9d8c4] bg-[#e8f3ec] text-[#317154]" : "border-[#f0c7bd] bg-[#fff0eb] text-[#b54e3c]"}`}
+                    >
+                      <span
+                        className={`h-2 w-2 rounded-full ${visitorAccessQuery.data ? "bg-[#4f8f77]" : "bg-[#e4684d]"}`}
+                      />
+                      Visitantes:{" "}
+                      {visitorAccessQuery.data ? "Ativo" : "Inativo"}
+                    </Button>
+                    <PrintButton label="Imprimir equipe" />
+                  </div>
+                </div>
+                <Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)] overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                      <thead className="bg-[#f7f9f6] border-b border-[#e5ebe5]">
+                        <tr>
+                          {[
+                            "Usuário",
+                            "E-mail",
+                            "Permissão",
+                            "Último acesso",
+                            "Cadastrado em",
+                            "Ações",
+                          ].map(head => (
+                            <th
+                              key={head}
+                              className="px-5 py-3 text-[10px] uppercase tracking-[0.12em] text-[#75827f] font-bold"
+                            >
+                              {head}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#edf1ed]">
+                        {team.map(member => (
+                          <tr key={member.id} className="hover:bg-[#fbfcfa]">
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-9 w-9">
+                                  <AvatarFallback
+                                    className={
+                                      member.role === "admin"
+                                        ? "bg-[#fff0eb] text-[#b54e3c] text-xs font-bold"
+                                        : "bg-[#e8f3ec] text-[#317154] text-xs font-bold"
+                                    }
+                                  >
+                                    {initials(member.name)}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span className="font-semibold text-sm">
+                                  {member.name || "Sem nome"}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-5 py-4 text-sm text-[#61716d]">
+                              {member.email || "—"}
+                            </td>
+                            <td className="px-5 py-4">
+                              <span
+                                className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${member.role === "admin" ? "bg-[#fff0eb] text-[#b54e3c]" : "bg-[#e8f3ec] text-[#317154]"}`}
+                              >
+                                {member.role === "admin" && (
+                                  <ShieldCheck className="h-3 w-3" />
+                                )}
+                                {member.role === "admin"
+                                  ? "Administrador"
+                                  : "Usuário"}
+                              </span>
+                            </td>
+                            <td className="px-5 py-4 text-sm text-[#61716d]">
+                              {formatDateTime(member.lastSignedIn)}
+                            </td>
+                            <td className="px-5 py-4 text-sm text-[#61716d]">
+                              {formatDate(member.createdAt)}
+                            </td>
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  title={
+                                    member.active !== 0
+                                      ? "Inativar usuário"
+                                      : "Ativar usuário"
+                                  }
+                                  className={`no-print h-8 px-2 text-[11px] gap-1 ${member.active !== 0 ? "border-[#b9d8c4] bg-[#e8f3ec] text-[#317154]" : "border-[#f0c7bd] bg-[#fff0eb] text-[#b54e3c]"}`}
+                                  disabled={
+                                    member.id === user?.id ||
+                                    setActiveMutation.isPending
+                                  }
+                                  onClick={() =>
+                                    setActiveMutation.mutate({
+                                      id: member.id,
+                                      active: member.active === 0,
+                                    })
+                                  }
+                                >
+                                  <span
+                                    className={`h-1.5 w-1.5 rounded-full ${member.active !== 0 ? "bg-[#4f8f77]" : "bg-[#e4684d]"}`}
+                                  />
+                                  {member.active !== 0 ? "Ativo" : "Inativo"}
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  title="Editar membro"
+                                  className="no-print h-8 w-8 text-[#4f8f77] hover:bg-[#e8f3ec]"
+                                  onClick={() => {
+                                    setEditingId(member.id);
+                                    setMemberName(member.name || "");
+                                    setMemberEmail(member.email || "");
+                                    setMemberRole(member.role);
+                                    setMemberDialog(true);
+                                  }}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  title="Excluir membro"
+                                  className="no-print h-8 w-8 text-[#b54e3c] hover:bg-[#fff0eb]"
+                                  disabled={
+                                    member.id === user?.id ||
+                                    removeMemberMutation.isPending
+                                  }
+                                  onClick={() => {
+                                    if (
+                                      window.confirm(
+                                        `Excluir ${member.name || member.email || "este membro"}?`
+                                      )
+                                    )
+                                      removeMemberMutation.mutate({
+                                        id: member.id,
+                                      });
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                        {team.length === 0 && (
+                          <tr>
+                            <td
+                              colSpan={6}
+                              className="p-12 text-center text-sm text-[#75827f]"
+                            >
+                              Nenhum usuário adicional encontrado ainda.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </Card>
+              </>
+            )}
+          </section>
+        )}
+      </main>
 
-    <Dialog open={memberDialog} onOpenChange={open => { setMemberDialog(open); if (!open) setEditingId(null); }}><DialogContent className="sm:max-w-[500px] bg-white"><DialogHeader><DialogTitle className="font-display text-2xl">{editingId ? "Editar Membro" : "Adicionar Membro"}</DialogTitle><p className="text-sm text-[#75827f]">{editingId ? "Atualize os dados e a permissão deste usuário." : "Cadastre uma pessoa autorizada a acessar o aplicativo."}</p></DialogHeader><form className="grid gap-4 mt-2" onSubmit={event => { event.preventDefault(); if (editingId) updateMemberMutation.mutate({ id: editingId, name: memberName, email: memberEmail, role: memberRole }); else addMemberMutation.mutate({ name: memberName, email: memberEmail, role: memberRole }); }}><label className="grid gap-1.5 text-sm font-semibold text-[#244537]">Nome completo<Input required minLength={2} value={memberName} onChange={event => setMemberName(event.target.value)} placeholder="Ex.: Ana Souza" className="font-normal" /></label><label className="grid gap-1.5 text-sm font-semibold text-[#244537]">E-mail<Input required type="email" value={memberEmail} onChange={event => setMemberEmail(event.target.value)} placeholder="ana@empresa.com" className="font-normal" /></label><label className="grid gap-1.5 text-sm font-semibold text-[#244537]">Permissão<Select value={memberRole} onValueChange={value => setMemberRole(value as "user" | "admin")}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50"><SelectItem value="user">Usuário</SelectItem><SelectItem value="admin">Administrador</SelectItem></SelectContent></Select></label><div className="flex justify-end gap-2 pt-2"><Button type="button" variant="outline" onClick={() => { setMemberDialog(false); setEditingId(null); }}>Cancelar</Button><Button type="submit" disabled={addMemberMutation.isPending || updateMemberMutation.isPending} className="bg-[#e4684d] hover:bg-[#c9533b] text-white">{addMemberMutation.isPending || updateMemberMutation.isPending ? "Salvando…" : editingId ? "Salvar alterações" : "Salvar membro"}</Button></div></form></DialogContent></Dialog>
-    <Dialog open={Boolean(selectedVehicle)} onOpenChange={open => !open && setSelectedVehicle(null)}><DialogContent style={{ inset: 0, left: 0, top: 0, transform: "none", width: "100vw", height: "100vh", maxWidth: "none", maxHeight: "none" }} className="fixed rounded-none border-0 bg-[#f5f6f2] p-0 overflow-y-auto"><div className="max-w-[1200px] mx-auto w-full p-5 md:p-10"><DialogHeader className="border-b border-[#dce5de] pb-6"><div className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs uppercase tracking-[0.16em] text-[#4f8f77] font-semibold">Histórico unificado do veículo</p><DialogTitle className="font-display text-3xl md:text-4xl font-bold mt-2">{selectedVehicle?.plate}</DialogTitle><p className="text-sm text-[#75827f] mt-1">{selectedVehicle?.model || "Modelo não informado"} · dados mensais e checklists</p></div><PrintButton label="Imprimir histórico" /></div></DialogHeader><div className="grid grid-cols-2 md:grid-cols-4 gap-3 my-6"><StatCard label="Abas mensais" value={selectedVehicleTrips.length.toString()} detail="viagens planejadas" icon={MapPin} accent="bg-[#e4684d]" /><StatCard label="Registros" value={selectedVehicleRecords.length.toString()} detail="saída/chegada" icon={ClipboardList} accent="bg-[#4f8f77]" /><StatCard label="Motoristas" value={new Set([...selectedVehicleTrips.map(t => t.driverName), ...selectedVehicleRecords.map(r => r.respondentName || "Não informado")]).size.toString()} detail="que utilizaram" icon={Users} accent="bg-[#e5b74f]" /><StatCard label="Último registro" value={formatDate(selectedVehicleRecords[0]?.recordedAt || selectedVehicleTrips[0]?.tripDate)} detail="nas duas fontes" icon={CalendarDays} accent="bg-[#7194b0]" /></div><Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)] overflow-hidden mb-6"><CardHeader><CardTitle className="font-display text-lg">Viagens das abas mensais</CardTitle></CardHeader><div className="overflow-x-auto"><table className="w-full text-left"><thead className="bg-[#f7f9f6] border-y border-[#e5ebe5]"><tr>{["Data", "Aba", "Motorista", "Destino", "Ação"].map(head => <th key={head} className="px-4 py-3 text-[10px] uppercase tracking-[0.12em] text-[#75827f] font-bold">{head}</th>)}</tr></thead><tbody className="divide-y divide-[#edf1ed]">{selectedVehicleTrips.map(trip => <tr key={trip.id}><td className="px-4 py-4 text-sm font-semibold">{formatDate(trip.tripDate)}</td><td className="px-4 py-4 text-xs text-[#4f8f77]">{trip.sourceSheet}</td><td className="px-4 py-4 text-sm">{trip.driverName}</td><td className="px-4 py-4 text-sm">{trip.destination || "—"}</td><td className="px-4 py-4 text-sm text-[#61716d]">{trip.purpose || "—"}</td></tr>)}</tbody></table></div></Card><Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)] overflow-hidden"><CardHeader><CardTitle className="font-display text-lg">Registros de saída e chegada</CardTitle></CardHeader><div className="overflow-x-auto"><table className="w-full text-left"><thead className="bg-[#f7f9f6] border-y border-[#e5ebe5]"><tr>{["Data/hora", "Evento", "Motorista", "Km inicial", "Km final", "Atendimento"].map(head => <th key={head} className="px-4 py-3 text-[10px] uppercase tracking-[0.12em] text-[#75827f] font-bold">{head}</th>)}</tr></thead><tbody className="divide-y divide-[#edf1ed]">{selectedVehicleRecords.map(record => <tr key={record.id}><td className="px-4 py-4 text-sm font-semibold">{formatDateTime(record.recordedAt)}</td><td className="px-4 py-4 text-sm">{record.event || "—"}</td><td className="px-4 py-4 text-sm">{record.respondentName || "Não informado"}</td><td className="px-4 py-4 text-sm">{record.kmInitial || "—"}</td><td className="px-4 py-4 text-sm">{record.kmFinal || "—"}</td><td className="px-4 py-4 text-sm text-[#61716d]">{record.serviceType || "—"}</td></tr>)}</tbody></table></div></Card></div></DialogContent></Dialog>
-    <footer className="no-print max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-8 text-xs text-[#9aa6a2] flex flex-wrap justify-between gap-2"><span>Controle de Viagens · dados em nuvem</span><span>Período de análise: maio/2022 a agosto/2026</span></footer></div>;
+      <Dialog
+        open={memberDialog}
+        onOpenChange={open => {
+          setMemberDialog(open);
+          if (!open) setEditingId(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-[500px] bg-white">
+          <DialogHeader>
+            <DialogTitle className="font-display text-2xl">
+              {editingId ? "Editar Membro" : "Adicionar Membro"}
+            </DialogTitle>
+            <p className="text-sm text-[#75827f]">
+              {editingId
+                ? "Atualize os dados e a permissão deste usuário."
+                : "Cadastre uma pessoa autorizada a acessar o aplicativo."}
+            </p>
+          </DialogHeader>
+          <form
+            className="grid gap-4 mt-2"
+            onSubmit={event => {
+              event.preventDefault();
+              if (editingId)
+                updateMemberMutation.mutate({
+                  id: editingId,
+                  name: memberName,
+                  email: memberEmail,
+                  role: memberRole,
+                });
+              else
+                addMemberMutation.mutate({
+                  name: memberName,
+                  email: memberEmail,
+                  role: memberRole,
+                });
+            }}
+          >
+            <label className="grid gap-1.5 text-sm font-semibold text-[#244537]">
+              Nome completo
+              <Input
+                required
+                minLength={2}
+                value={memberName}
+                onChange={event => setMemberName(event.target.value)}
+                placeholder="Ex.: Ana Souza"
+                className="font-normal"
+              />
+            </label>
+            <label className="grid gap-1.5 text-sm font-semibold text-[#244537]">
+              E-mail
+              <Input
+                required
+                type="email"
+                value={memberEmail}
+                onChange={event => setMemberEmail(event.target.value)}
+                placeholder="ana@empresa.com"
+                className="font-normal"
+              />
+            </label>
+            <label className="grid gap-1.5 text-sm font-semibold text-[#244537]">
+              Permissão
+              <Select
+                value={memberRole}
+                onValueChange={value =>
+                  setMemberRole(value as "user" | "admin")
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50">
+                  <SelectItem value="user">Usuário</SelectItem>
+                  <SelectItem value="admin">Administrador</SelectItem>
+                </SelectContent>
+              </Select>
+            </label>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setMemberDialog(false);
+                  setEditingId(null);
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={
+                  addMemberMutation.isPending || updateMemberMutation.isPending
+                }
+                className="bg-[#e4684d] hover:bg-[#c9533b] text-white"
+              >
+                {addMemberMutation.isPending || updateMemberMutation.isPending
+                  ? "Salvando…"
+                  : editingId
+                    ? "Salvar alterações"
+                    : "Salvar membro"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={Boolean(selectedVehicle)}
+        onOpenChange={open => !open && setSelectedVehicle(null)}
+      >
+        <DialogContent
+          style={{
+            inset: 0,
+            left: 0,
+            top: 0,
+            transform: "none",
+            width: "100vw",
+            height: "100vh",
+            maxWidth: "none",
+            maxHeight: "none",
+          }}
+          className="fixed rounded-none border-0 bg-[#f5f6f2] p-0 overflow-y-auto"
+        >
+          <div className="max-w-[1200px] mx-auto w-full p-5 md:p-10">
+            <DialogHeader className="border-b border-[#dce5de] pb-6">
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.16em] text-[#4f8f77] font-semibold">
+                    Histórico unificado do veículo
+                  </p>
+                  <DialogTitle className="font-display text-3xl md:text-4xl font-bold mt-2">
+                    {selectedVehicle?.plate}
+                  </DialogTitle>
+                  <p className="text-sm text-[#75827f] mt-1">
+                    {selectedVehicle?.model || "Modelo não informado"} · dados
+                    mensais e checklists
+                  </p>
+                </div>
+                <PrintButton label="Imprimir histórico" />
+              </div>
+            </DialogHeader>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 my-6">
+              <StatCard
+                label="Abas mensais"
+                value={selectedVehicleTrips.length.toString()}
+                detail="viagens planejadas"
+                icon={MapPin}
+                accent="bg-[#e4684d]"
+              />
+              <StatCard
+                label="Registros"
+                value={selectedVehicleRecords.length.toString()}
+                detail="saída/chegada"
+                icon={ClipboardList}
+                accent="bg-[#4f8f77]"
+              />
+              <StatCard
+                label="Motoristas"
+                value={new Set([
+                  ...selectedVehicleTrips.map(t => t.driverName),
+                  ...selectedVehicleRecords.map(
+                    r => r.respondentName || "Não informado"
+                  ),
+                ]).size.toString()}
+                detail="que utilizaram"
+                icon={Users}
+                accent="bg-[#e5b74f]"
+              />
+              <StatCard
+                label="Último registro"
+                value={formatDate(
+                  selectedVehicleRecords[0]?.recordedAt ||
+                    selectedVehicleTrips[0]?.tripDate
+                )}
+                detail="nas duas fontes"
+                icon={CalendarDays}
+                accent="bg-[#7194b0]"
+              />
+            </div>
+            <Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)] overflow-hidden mb-6">
+              <CardHeader>
+                <CardTitle className="font-display text-lg">
+                  Viagens das abas mensais
+                </CardTitle>
+              </CardHeader>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-[#f7f9f6] border-y border-[#e5ebe5]">
+                    <tr>
+                      {["Data", "Aba", "Motorista", "Destino", "Ação"].map(
+                        head => (
+                          <th
+                            key={head}
+                            className="px-4 py-3 text-[10px] uppercase tracking-[0.12em] text-[#75827f] font-bold"
+                          >
+                            {head}
+                          </th>
+                        )
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#edf1ed]">
+                    {selectedVehicleTrips.map(trip => (
+                      <tr key={trip.id}>
+                        <td className="px-4 py-4 text-sm font-semibold">
+                          {formatDate(trip.tripDate)}
+                        </td>
+                        <td className="px-4 py-4 text-xs text-[#4f8f77]">
+                          {trip.sourceSheet}
+                        </td>
+                        <td className="px-4 py-4 text-sm">{trip.driverName}</td>
+                        <td className="px-4 py-4 text-sm">
+                          {trip.destination || "—"}
+                        </td>
+                        <td className="px-4 py-4 text-sm text-[#61716d]">
+                          {trip.purpose || "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+            <Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)] overflow-hidden">
+              <CardHeader>
+                <CardTitle className="font-display text-lg">
+                  Registros de saída e chegada
+                </CardTitle>
+              </CardHeader>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-[#f7f9f6] border-y border-[#e5ebe5]">
+                    <tr>
+                      {[
+                        "Data/hora",
+                        "Evento",
+                        "Motorista",
+                        "Km inicial",
+                        "Km final",
+                        "Atendimento",
+                      ].map(head => (
+                        <th
+                          key={head}
+                          className="px-4 py-3 text-[10px] uppercase tracking-[0.12em] text-[#75827f] font-bold"
+                        >
+                          {head}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#edf1ed]">
+                    {selectedVehicleRecords.map(record => (
+                      <tr key={record.id}>
+                        <td className="px-4 py-4 text-sm font-semibold">
+                          {formatDateTime(record.recordedAt)}
+                        </td>
+                        <td className="px-4 py-4 text-sm">
+                          {record.event || "—"}
+                        </td>
+                        <td className="px-4 py-4 text-sm">
+                          {record.respondentName || "Não informado"}
+                        </td>
+                        <td className="px-4 py-4 text-sm">
+                          {record.kmInitial || "—"}
+                        </td>
+                        <td className="px-4 py-4 text-sm">
+                          {record.kmFinal || "—"}
+                        </td>
+                        <td className="px-4 py-4 text-sm text-[#61716d]">
+                          {record.serviceType || "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={Boolean(selectedRecord)}
+        onOpenChange={open => !open && setSelectedRecord(null)}
+      >
+        <DialogContent className="max-h-[90vh] max-w-[1100px] overflow-y-auto bg-[#f5f6f2] p-5 md:p-7">
+          <DialogHeader className="border-b border-[#dce5de] pb-4 pr-8">
+            <p className="text-xs uppercase tracking-[0.16em] text-[#4f8f77] font-semibold">
+              Detalhes completos do registro
+            </p>
+            <DialogTitle className="font-display text-2xl md:text-3xl font-bold mt-1">
+              {selectedRecord
+                ? `Veículo ${selectedRecord.vehiclePlate}`
+                : "Registro"}
+            </DialogTitle>
+            <p className="text-sm text-[#75827f] mt-1">
+              {selectedRecord?.recordMode === "paired"
+                ? "Saída e chegada associadas pelo sistema."
+                : selectedRecord?.recordMode === "departure"
+                  ? "Saída sem chegada correspondente."
+                  : "Chegada sem saída correspondente."}
+            </p>
+          </DialogHeader>
+          {selectedRecord && (
+            <div className="space-y-4 pt-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-semibold ${selectedRecord.recordMode === "paired" ? "bg-[#e8f3ec] text-[#317154]" : "bg-[#fff0eb] text-[#b54e3c]"}`}
+                >
+                  {selectedRecord.event}
+                </span>
+                {selectedRecord.arrival && (
+                  <span className="text-xs text-[#75827f]">
+                    Clique fora ou pressione Esc para fechar
+                  </span>
+                )}
+              </div>
+              <RecordDetailSection
+                title={
+                  selectedRecord.recordMode === "arrival" ? "Chegada" : "Saída"
+                }
+                record={selectedRecord}
+                eventLabel={
+                  selectedRecord.originalEvent || selectedRecord.event
+                }
+              />
+              {selectedRecord.arrival && (
+                <RecordDetailSection
+                  title="Chegada relacionada"
+                  record={selectedRecord.arrival}
+                  eventLabel={selectedRecord.arrival.event}
+                />
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+      <footer className="no-print max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-8 text-xs text-[#9aa6a2] flex flex-wrap justify-between gap-2">
+        <span>Controle de Viagens · dados em nuvem</span>
+        <span>Período de análise: maio/2022 a agosto/2026</span>
+      </footer>
+    </div>
+  );
 }
 
-function EmptyState({ icon: Icon, title, detail }: { icon: React.ElementType; title: string; detail: string }) { return <Card className="border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)]"><CardContent className="p-12 text-center"><Icon className="h-9 w-9 text-[#4f8f77] mx-auto" /><h3 className="font-display font-bold text-lg mt-4">{title}</h3><p className="text-sm text-[#75827f] mt-2">{detail}</p></CardContent></Card>; }
+function EmptyState({
+  icon: Icon,
+  title,
+  detail,
+}: {
+  icon: React.ElementType;
+  title: string;
+  detail: string;
+}) {
+  return (
+    <Card className="border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)]">
+      <CardContent className="p-12 text-center">
+        <Icon className="h-9 w-9 text-[#4f8f77] mx-auto" />
+        <h3 className="font-display font-bold text-lg mt-4">{title}</h3>
+        <p className="text-sm text-[#75827f] mt-2">{detail}</p>
+      </CardContent>
+    </Card>
+  );
+}
