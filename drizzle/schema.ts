@@ -14,7 +14,7 @@ export const users = mysqlTable("users", {
 
 export const vehicles = mysqlTable("vehicles", {
   id: int("id").autoincrement().primaryKey(),
-  plate: varchar("plate", { length: 16 }).notNull().unique(),
+  plate: varchar("plate", { length: 80 }).notNull().unique(),
   model: varchar("model", { length: 120 }),
   category: varchar("category", { length: 80 }),
   year: int("year"),
@@ -27,7 +27,7 @@ export const trips = mysqlTable("trips", {
   id: int("id").autoincrement().primaryKey(),
   tripDate: timestamp("tripDate").notNull(),
   vehicleId: int("vehicleId"),
-  vehiclePlate: varchar("vehiclePlate", { length: 16 }).notNull(),
+  vehiclePlate: varchar("vehiclePlate", { length: 80 }).notNull(),
   vehicleModel: varchar("vehicleModel", { length: 120 }),
   driverName: varchar("driverName", { length: 160 }).notNull(),
   origin: varchar("origin", { length: 160 }),
