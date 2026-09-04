@@ -5,8 +5,9 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { getVisitorAccess, importTrips, listDepartureArrivalRecords, listTrips, listUsers, listVehicles, setVisitorAccess, upsertUser } from "./db";
+import { deleteUserById, getUserById, getVisitorAccess, importTrips, listDepartureArrivalRecords, listTrips, listUsers, listVehicles, setVisitorAccess, updateUserById, upsertUser } from "./db";
 import type { InsertTrip } from "../drizzle/schema";
+import { ENV } from "./_core/env";
 
 function parseCsvLine(line: string) {
   const values: string[] = [];
@@ -115,6 +116,22 @@ export const appRouter = router({
       const email = input.email.toLowerCase();
       const inviteOpenId = `invite:${createHash("sha256").update(email).digest("hex").slice(0, 56)}`;
       await upsertUser({ openId: inviteOpenId, name: input.name, email, loginMethod: "admin-invite", role: input.role });
+      return { success: true } as const;
+    }),
+    updateMember: adminProcedure.input(z.object({ id: z.number().int().positive(), name: z.string().min(2), email: z.string().email(), role: z.enum(["user", "admin"]) })).mutation(async ({ input }) => {
+      const member = await getUserById(input.id);
+      if (!member) throw new TRPCError({ code: "NOT_FOUND", message: "Membro não encontrado." });
+      const email = input.email.toLowerCase();
+      const inviteOpenId = member.openId.startsWith("invite:") ? `invite:${createHash("sha256").update(email).digest("hex").slice(0, 56)}` : undefined;
+      await updateUserById(input.id, { name: input.name, email, role: input.role }, inviteOpenId);
+      return { success: true } as const;
+    }),
+    removeMember: adminProcedure.input(z.object({ id: z.number().int().positive() })).mutation(async ({ ctx, input }) => {
+      const member = await getUserById(input.id);
+      if (!member) throw new TRPCError({ code: "NOT_FOUND", message: "Membro não encontrado." });
+      if (member.id === ctx.user.id) throw new TRPCError({ code: "FORBIDDEN", message: "Não é permitido excluir a própria conta." });
+      if (member.openId === ENV.ownerOpenId) throw new TRPCError({ code: "FORBIDDEN", message: "A conta proprietária não pode ser excluída." });
+      await deleteUserById(input.id);
       return { success: true } as const;
     }),
   }),

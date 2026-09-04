@@ -1,0 +1,27 @@
+from pathlib import Path
+p = Path('/home/ubuntu/controle-viagens/client/src/pages/Home.tsx')
+t = p.read_text()
+t = t.replace('ArrowDownUp, BarChart3, CalendarDays, CarFront, ChevronDown,', 'ArrowDownUp, BarChart3, CalendarDays, CarFront, ChevronDown, Pencil,')
+t = t.replace('Users, X,', 'Users, X, Trash2,')
+old = '  const addMemberMutation = trpc.team.addMember.useMutation({ onSuccess: () => { toast.success("Membro adicionado à equipe."); teamQuery.refetch(); setMemberDialog(false); setMemberName(""); setMemberEmail(""); setMemberRole("user"); }, onError: error => toast.error(error.message) });'
+new = old + '\n  const updateMemberMutation = trpc.team.updateMember.useMutation({ onSuccess: () => { toast.success("Membro atualizado."); teamQuery.refetch(); setMemberDialog(false); setEditingId(null); setMemberName(""); setMemberEmail(""); setMemberRole("user"); }, onError: error => toast.error(error.message) });\n  const removeMemberMutation = trpc.team.removeMember.useMutation({ onSuccess: () => { toast.success("Membro excluído."); teamQuery.refetch(); }, onError: error => toast.error(error.message) });'
+if t.count(old) != 1: raise SystemExit('mutation anchor not found')
+t = t.replace(old, new)
+t = t.replace('  const [memberDialog, setMemberDialog] = useState(false); const [memberName, setMemberName] = useState(""); const [memberEmail, setMemberEmail] = useState(""); const [memberRole, setMemberRole] = useState<"user" | "admin">("user");', '  const [memberDialog, setMemberDialog] = useState(false); const [editingId, setEditingId] = useState<number | null>(null); const [memberName, setMemberName] = useState(""); const [memberEmail, setMemberEmail] = useState(""); const [memberRole, setMemberRole] = useState<"user" | "admin">("user");')
+old_headers = '["Usuário", "E-mail", "Permissão", "Último acesso", "Cadastrado em"].map(head => <th key={head} className="px-5 py-3 text-[10px] uppercase tracking-[0.12em] text-[#75827f] font-bold">{head}</th>)'
+new_headers = '["Usuário", "E-mail", "Permissão", "Último acesso", "Cadastrado em", "Ações"].map(head => <th key={head} className="px-5 py-3 text-[10px] uppercase tracking-[0.12em] text-[#75827f] font-bold">{head}</th>)'
+if t.count(old_headers) != 1: raise SystemExit('team headers not found')
+t = t.replace(old_headers, new_headers)
+needle = '{formatDate(member.createdAt)}</td></tr>)}'
+actions = '{formatDate(member.createdAt)}</td><td className="px-5 py-4"><div className="flex items-center gap-1"><Button type="button" variant="ghost" size="icon" title="Editar membro" className="no-print h-8 w-8 text-[#4f8f77] hover:bg-[#e8f3ec]" onClick={() => { setEditingId(member.id); setMemberName(member.name || ""); setMemberEmail(member.email || ""); setMemberRole(member.role); setMemberDialog(true); }}><Pencil className="h-4 w-4" /></Button><Button type="button" variant="ghost" size="icon" title="Excluir membro" className="no-print h-8 w-8 text-[#b54e3c] hover:bg-[#fff0eb]" disabled={member.id === user?.id || removeMemberMutation.isPending} onClick={() => { if (window.confirm(`Excluir ${member.name || member.email || "este membro"}?`)) removeMemberMutation.mutate({ id: member.id }); }}><Trash2 className="h-4 w-4" /></Button></div></td></tr>)}'
+if t.count(needle) != 1: raise SystemExit('team row anchor not found')
+t = t.replace(needle, actions)
+t = t.replace('Nenhum usuário adicional encontrado ainda.</td></tr>)}', 'Nenhum usuário adicional encontrado ainda.</td></tr>)}')
+t = t.replace('colSpan={5} className="p-12 text-center text-sm text-[#75827f]"', 'colSpan={6} className="p-12 text-center text-sm text-[#75827f]"')
+old_dialog = '<Dialog open={memberDialog} onOpenChange={setMemberDialog}><DialogContent className="sm:max-w-[500px] bg-white"><DialogHeader><DialogTitle className="font-display text-2xl">Adicionar Membro</DialogTitle><p className="text-sm text-[#75827f]">Cadastre uma pessoa autorizada a acessar o aplicativo.</p></DialogHeader><form className="grid gap-4 mt-2" onSubmit={event => { event.preventDefault(); addMemberMutation.mutate({ name: memberName, email: memberEmail, role: memberRole }); }}>'
+new_dialog = '<Dialog open={memberDialog} onOpenChange={open => { setMemberDialog(open); if (!open) setEditingId(null); }}><DialogContent className="sm:max-w-[500px] bg-white"><DialogHeader><DialogTitle className="font-display text-2xl">{editingId ? "Editar Membro" : "Adicionar Membro"}</DialogTitle><p className="text-sm text-[#75827f]">{editingId ? "Atualize os dados e a permissão deste usuário." : "Cadastre uma pessoa autorizada a acessar o aplicativo."}</p></DialogHeader><form className="grid gap-4 mt-2" onSubmit={event => { event.preventDefault(); if (editingId) updateMemberMutation.mutate({ id: editingId, name: memberName, email: memberEmail, role: memberRole }); else addMemberMutation.mutate({ name: memberName, email: memberEmail, role: memberRole }); }}>'
+if t.count(old_dialog) != 1: raise SystemExit('dialog anchor not found')
+t = t.replace(old_dialog, new_dialog)
+t = t.replace('onClick={() => setMemberDialog(false)}>Cancelar</Button><Button type="submit" disabled={addMemberMutation.isPending}', 'onClick={() => { setMemberDialog(false); setEditingId(null); }}>Cancelar</Button><Button type="submit" disabled={addMemberMutation.isPending || updateMemberMutation.isPending}')
+t = t.replace('{addMemberMutation.isPending ? "Salvando…" : "Salvar membro"}', '{addMemberMutation.isPending || updateMemberMutation.isPending ? "Salvando…" : editingId ? "Salvar alterações" : "Salvar membro"}')
+p.write_text(t)

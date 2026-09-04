@@ -10,4 +10,6 @@
 - [x] Remover botões de Importar CSV
 - [x] Adicionar ordenação clicável nas tabelas de Viagens e Registros
 - [x] Abrir histórico de veículos em tela cheia
+- [x] Adicionar edição administrativa de membros
+- [x] Adicionar exclusão administrativa protegida de membros
 - [x] Validar importação, build e testes
