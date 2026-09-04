@@ -1,6 +1,6 @@
 import { desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { departureArrivalRecords, InsertTrip, InsertUser, trips, users, vehicles } from "../drizzle/schema";
+import { appSettings, departureArrivalRecords, InsertTrip, InsertUser, trips, users, vehicles } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -21,6 +21,23 @@ export async function upsertUser(user: InsertUser): Promise<void> {
   if (!user.openId) throw new Error("User openId is required for upsert");
   const db = await getDb();
   if (!db) return;
+  if (user.email) {
+    const invited = await db.select({ id: users.id, openId: users.openId }).from(users).where(eq(users.email, user.email)).limit(1);
+    if (user.openId.startsWith("invite:") && invited[0]) {
+      await db.update(users).set({ name: user.name ?? null, email: user.email, role: user.role ?? "user", loginMethod: user.loginMethod ?? "admin-invite" }).where(eq(users.id, invited[0].id));
+      return;
+    }
+    if (!user.openId.startsWith("invite:") && invited[0]?.openId.startsWith("invite:")) {
+      await db.update(users).set({
+        openId: user.openId,
+        name: user.name ?? null,
+        email: user.email,
+        loginMethod: user.loginMethod ?? null,
+        lastSignedIn: user.lastSignedIn ?? new Date(),
+      }).where(eq(users.id, invited[0].id));
+      return;
+    }
+  }
   const values: InsertUser = { openId: user.openId };
   const updateSet: Record<string, unknown> = {};
   const textFields = ["name", "email", "loginMethod"] as const;
@@ -51,6 +68,20 @@ export async function getUserByOpenId(openId: string) {
   if (!db) return undefined;
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
   return result[0];
+}
+
+export async function getVisitorAccess() {
+  const db = await getDb();
+  if (!db) return false;
+  const result = await db.select().from(appSettings).where(eq(appSettings.key, "visitor_access")).limit(1);
+  return result[0]?.value === "active";
+}
+
+export async function setVisitorAccess(enabled: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("Banco de dados indisponível");
+  await db.insert(appSettings).values({ key: "visitor_access", value: enabled ? "active" : "inactive" }).onDuplicateKeyUpdate({ set: { value: enabled ? "active" : "inactive" } });
+  return enabled;
 }
 
 export async function listTrips() {

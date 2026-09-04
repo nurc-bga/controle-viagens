@@ -1,10 +1,11 @@
 import { TRPCError } from "@trpc/server";
+import { createHash } from "node:crypto";
 import { z } from "zod";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { importTrips, listDepartureArrivalRecords, listTrips, listUsers, listVehicles, upsertUser } from "./db";
+import { getVisitorAccess, importTrips, listDepartureArrivalRecords, listTrips, listUsers, listVehicles, setVisitorAccess, upsertUser } from "./db";
 import type { InsertTrip } from "../drizzle/schema";
 
 function parseCsvLine(line: string) {
@@ -56,10 +57,17 @@ function parseStatus(value: string): "Concluída" | "Em andamento" | "Cancelada"
   return "Concluída";
 }
 
+const visitorProcedure = publicProcedure.use(async ({ ctx, next }) => {
+  if (ctx.user || await getVisitorAccess()) return next();
+  throw new TRPCError({ code: "UNAUTHORIZED", message: "Acesso restrito a usuários cadastrados." });
+});
+
 export const appRouter = router({
   system: systemRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
+    visitorAccess: publicProcedure.query(() => getVisitorAccess()),
+    setVisitorAccess: adminProcedure.input(z.object({ enabled: z.boolean() })).mutation(({ input }) => setVisitorAccess(input.enabled)),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
@@ -67,7 +75,7 @@ export const appRouter = router({
     }),
   }),
   trips: router({
-    list: protectedProcedure.query(() => listTrips()),
+    list: visitorProcedure.query(() => listTrips()),
     importCsv: adminProcedure.input(z.object({ csvText: z.string().min(1), filename: z.string().optional() })).mutation(async ({ input }) => {
       const lines = input.csvText.replace(/^\uFEFF/, "").split(/\r?\n/).filter(line => line.trim().length > 0);
       if (lines.length < 2) throw new TRPCError({ code: "BAD_REQUEST", message: "O CSV precisa ter cabeçalho e pelo menos uma linha." });
@@ -99,12 +107,14 @@ export const appRouter = router({
       return importTrips(parsedTrips, Array.from(vehicleMap.values()));
     }),
   }),
-  vehicles: router({ list: protectedProcedure.query(() => listVehicles()) }),
-  departureArrival: router({ list: protectedProcedure.query(() => listDepartureArrivalRecords()) }),
+  vehicles: router({ list: visitorProcedure.query(() => listVehicles()) }),
+  departureArrival: router({ list: visitorProcedure.query(() => listDepartureArrivalRecords()) }),
   team: router({
     list: protectedProcedure.query(({ ctx }) => ctx.user.role === "admin" ? listUsers() : []),
     addMember: adminProcedure.input(z.object({ name: z.string().min(2), email: z.string().email(), role: z.enum(["user", "admin"]) })).mutation(async ({ input }) => {
-      await upsertUser({ openId: `invite:${input.email.toLowerCase()}`, name: input.name, email: input.email.toLowerCase(), loginMethod: "admin-invite", role: input.role });
+      const email = input.email.toLowerCase();
+      const inviteOpenId = `invite:${createHash("sha256").update(email).digest("hex").slice(0, 56)}`;
+      await upsertUser({ openId: inviteOpenId, name: input.name, email, loginMethod: "admin-invite", role: input.role });
       return { success: true } as const;
     }),
   }),
