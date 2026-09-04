@@ -4,7 +4,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { importTrips, listTrips, listUsers, listVehicles, upsertUser } from "./db";
+import { importTrips, listDepartureArrivalRecords, listTrips, listUsers, listVehicles, upsertUser } from "./db";
 import type { InsertTrip } from "../drizzle/schema";
 
 function parseCsvLine(line: string) {
@@ -100,6 +100,7 @@ export const appRouter = router({
     }),
   }),
   vehicles: router({ list: protectedProcedure.query(() => listVehicles()) }),
+  departureArrival: router({ list: protectedProcedure.query(() => listDepartureArrivalRecords()) }),
   team: router({
     list: protectedProcedure.query(({ ctx }) => ctx.user.role === "admin" ? listUsers() : []),
     addMember: adminProcedure.input(z.object({ name: z.string().min(2), email: z.string().email(), role: z.enum(["user", "admin"]) })).mutation(async ({ input }) => {

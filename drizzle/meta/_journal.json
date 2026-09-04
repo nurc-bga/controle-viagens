@@ -22,6 +22,20 @@
       "when": 1788530818250,
       "tag": "0002_smart_boomer",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1788531560790,
+      "tag": "0003_chunky_gabe_jones",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1788531654174,
+      "tag": "0004_far_namorita",
+      "breakpoints": true
     }
   ]
 }

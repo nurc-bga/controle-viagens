@@ -1,6 +1,6 @@
 import { desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertTrip, InsertUser, trips, users, vehicles } from "../drizzle/schema";
+import { departureArrivalRecords, InsertTrip, InsertUser, trips, users, vehicles } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -63,6 +63,12 @@ export async function listVehicles() {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(vehicles).orderBy(vehicles.plate);
+}
+
+export async function listDepartureArrivalRecords() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(departureArrivalRecords).orderBy(desc(departureArrivalRecords.recordedAt));
 }
 
 export async function listUsers() {
