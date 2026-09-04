@@ -4,5 +4,5 @@
 - [x] Criar tabela cloud de registros brutos
 - [x] Adicionar aba Registros de Saída/Chegada
 - [x] Combinar e deduplicar veículos das duas fontes
+- [x] Aplicar filtros e impressão contextual por aba
 - [x] Validar importação, build e testes
-- [ ] Evolução futura: exportação PDF nativa por relatório
