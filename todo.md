@@ -20,4 +20,6 @@
 - [x] Adicionar botão global Sistema Ativo/Inativo
 - [x] Renomear a aba para Registros
 - [x] Consolidar variações de nomes nas duas fontes de dados
+- [x] Tornar menus de filtro opacos e ordenar opções em pt-BR
+- [x] Auditar e consolidar variações de nomes semelhantes, incluindo Adjailto/Adjailton
 - [x] Validar importação, build e testes
