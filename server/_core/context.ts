@@ -18,7 +18,7 @@ export async function createContext(
   const passwordUserId = getUserIdFromPasswordSession(opts.req);
   if (passwordUserId) {
     const passwordUser = await getUserById(passwordUserId);
-    user = passwordUser?.passwordHash ? passwordUser : null;
+    user = passwordUser?.passwordHash && passwordUser.active !== 0 ? passwordUser : null;
   }
 
   if (!user) {
@@ -29,6 +29,8 @@ export async function createContext(
       user = null;
     }
   }
+
+  if (user?.active === 0) user = null;
 
   return {
     req: opts.req,

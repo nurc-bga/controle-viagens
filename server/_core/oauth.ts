@@ -48,6 +48,12 @@ export function registerOAuthRoutes(app: Express) {
         lastSignedIn: new Date(),
       });
 
+      const storedUser = await db.getUserByOpenId(userInfo.openId);
+      if (storedUser?.active === 0) {
+        res.status(403).json({ error: "Acesso inativado pelo administrador." });
+        return;
+      }
+
       const sessionToken = await sdk.createSessionToken(userInfo.openId, {
         name: userInfo.name || "",
         expiresInMs: ONE_YEAR_MS,

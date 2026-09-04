@@ -15,4 +15,9 @@
 - [x] Depurar o fluxo público de autenticação e diferenciar login de acesso visitante
 - [x] Exibir acesso visitante como opção na tela inicial quando liberado
 - [x] Configurar ademirmaciel01@gmail.com para login Google sem senha
+- [x] Importar 33 usuários do PDF como convites Google ativos
+- [x] Adicionar botão individual Ativo/Inativo na Equipe
+- [x] Adicionar botão global Sistema Ativo/Inativo
+- [x] Renomear a aba para Registros
+- [x] Consolidar variações de nomes nas duas fontes de dados
 - [x] Validar importação, build e testes

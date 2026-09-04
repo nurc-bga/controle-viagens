@@ -77,6 +77,20 @@ export async function getVisitorAccess() {
   return result[0]?.value === "active";
 }
 
+export async function getSystemAccess() {
+  const db = await getDb();
+  if (!db) return true;
+  const result = await db.select().from(appSettings).where(eq(appSettings.key, "system_access")).limit(1);
+  return result[0]?.value !== "inactive";
+}
+
+export async function setSystemAccess(enabled: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("Banco de dados indisponível");
+  await db.insert(appSettings).values({ key: "system_access", value: enabled ? "active" : "inactive" }).onDuplicateKeyUpdate({ set: { value: enabled ? "active" : "inactive" } });
+  return enabled;
+}
+
 export async function setVisitorAccess(enabled: boolean) {
   const db = await getDb();
   if (!db) throw new Error("Banco de dados indisponível");
@@ -105,7 +119,7 @@ export async function listDepartureArrivalRecords() {
 export async function listUsers() {
   const db = await getDb();
   if (!db) return [];
-  return db.select({ id: users.id, name: users.name, email: users.email, role: users.role, lastSignedIn: users.lastSignedIn, createdAt: users.createdAt }).from(users).orderBy(users.name);
+  return db.select({ id: users.id, name: users.name, email: users.email, role: users.role, active: users.active, lastSignedIn: users.lastSignedIn, createdAt: users.createdAt }).from(users).orderBy(users.name);
 }
 
 export async function getUserById(id: number) {
@@ -144,6 +158,12 @@ export async function deleteUserById(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Banco de dados indisponível");
   await db.delete(users).where(eq(users.id, id));
+}
+
+export async function setUserActive(id: number, active: boolean) {
+  const db = await getDb();
+  if (!db) throw new Error("Banco de dados indisponível");
+  await db.update(users).set({ active: active ? 1 : 0 }).where(eq(users.id, id));
 }
 
 export async function importTrips(rows: InsertTrip[], vehicleRows: Array<{ plate: string; model?: string | null; category?: string | null; year?: number | null }>) {

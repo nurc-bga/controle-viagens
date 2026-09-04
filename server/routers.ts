@@ -6,7 +6,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { createPasswordSession, hashPassword, PASSWORD_SESSION_COOKIE, verifyPassword } from "./passwordAuth";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { deleteUserById, getUserByEmail, getUserById, getVisitorAccess, importTrips, listDepartureArrivalRecords, listTrips, listUsers, listVehicles, markUserSignedIn, setUserPassword, setVisitorAccess, updateUserById, upsertUser } from "./db";
+import { deleteUserById, getSystemAccess, getUserByEmail, getUserById, getVisitorAccess, importTrips, listDepartureArrivalRecords, listTrips, listUsers, listVehicles, markUserSignedIn, setSystemAccess, setUserActive, setUserPassword, setVisitorAccess, updateUserById, upsertUser } from "./db";
 import type { InsertTrip } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -60,6 +60,10 @@ function parseStatus(value: string): "Concluída" | "Em andamento" | "Cancelada"
 }
 
 const visitorProcedure = publicProcedure.use(async ({ ctx, next }) => {
+  if (!(await getSystemAccess())) {
+    if (ctx.user?.role === "admin") return next();
+    throw new TRPCError({ code: "FORBIDDEN", message: "Sistema em manutenção." });
+  }
   if (ctx.user || await getVisitorAccess()) return next();
   throw new TRPCError({ code: "UNAUTHORIZED", message: "Acesso restrito a usuários cadastrados." });
 });
@@ -84,7 +88,9 @@ export const appRouter = router({
       return { success: true } as const;
     }),
     visitorAccess: publicProcedure.query(() => getVisitorAccess()),
+    systemAccess: publicProcedure.query(() => getSystemAccess()),
     setVisitorAccess: adminProcedure.input(z.object({ enabled: z.boolean() })).mutation(({ input }) => setVisitorAccess(input.enabled)),
+    setSystemAccess: adminProcedure.input(z.object({ enabled: z.boolean() })).mutation(({ input }) => setSystemAccess(input.enabled)),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
@@ -149,6 +155,14 @@ export const appRouter = router({
       if (member.id === ctx.user.id) throw new TRPCError({ code: "FORBIDDEN", message: "Não é permitido excluir a própria conta." });
       if (member.openId === ENV.ownerOpenId) throw new TRPCError({ code: "FORBIDDEN", message: "A conta proprietária não pode ser excluída." });
       await deleteUserById(input.id);
+      return { success: true } as const;
+    }),
+    setActive: adminProcedure.input(z.object({ id: z.number().int().positive(), active: z.boolean() })).mutation(async ({ ctx, input }) => {
+      const member = await getUserById(input.id);
+      if (!member) throw new TRPCError({ code: "NOT_FOUND", message: "Membro não encontrado." });
+      if (member.id === ctx.user.id && !input.active) throw new TRPCError({ code: "FORBIDDEN", message: "Não é permitido inativar a própria conta." });
+      if (member.openId === ENV.ownerOpenId && !input.active) throw new TRPCError({ code: "FORBIDDEN", message: "A conta proprietária não pode ser inativada." });
+      await setUserActive(input.id, input.active);
       return { success: true } as const;
     }),
     resetPassword: adminProcedure.input(z.object({ id: z.number().int().positive(), password: z.string().min(8) })).mutation(async ({ input }) => {
