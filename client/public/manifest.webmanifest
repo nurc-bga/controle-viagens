@@ -1,0 +1,17 @@
+{
+  "name": "Controle de Viagens",
+  "short_name": "Controle de Viagens",
+  "description": "Painel operacional de controle de viagens",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#14283f",
+  "theme_color": "#14283f",
+  "icons": [
+    {
+      "src": "/manus-storage/LogoCarroApp_3fa6ce03.png",
+      "sizes": "2048x2048",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
