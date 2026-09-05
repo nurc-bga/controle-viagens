@@ -1189,25 +1189,33 @@ export default function Home() {
     <div className="min-h-screen bg-[#f5f6f2] text-[#14283f]">
       <header className="no-print sticky top-0 z-30 border-b border-[#e1e8e2] bg-[#f5f6f2]/95 backdrop-blur-md">
         <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 h-[74px] flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-3 shrink-0 min-w-0">
             <div className="h-10 w-10 rounded-xl bg-[#14283f] text-white flex items-center justify-center shadow-sm">
               <VehicleMark className="h-6 w-6 text-white" />
             </div>
-            <div>
-              <div className="font-display font-bold text-lg leading-none">
+            <div className="min-w-0">
+              <div className="font-display font-bold text-lg leading-none whitespace-nowrap">
                 Controle <span className="text-[#e4684d]">de Viagens</span>
               </div>
-              <div className="text-[10px] uppercase tracking-[0.16em] text-[#75827f] mt-1">
+              <div className="text-[10px] uppercase tracking-[0.16em] text-[#75827f] mt-1 whitespace-nowrap">
                 Painel de operações
               </div>
             </div>
+            <a
+              href="https://ais-pre-qugj34hsggrsvfbp3mgblk-119516947509.us-west2.run.app/"
+              target="_blank"
+              rel="noreferrer"
+              className="no-print hidden md:inline-flex shrink-0 items-center rounded-lg border border-[#d6e0d8] bg-white px-2.5 py-2 text-[11px] font-bold tracking-[0.04em] text-[#244537] shadow-sm transition-colors hover:border-[#b9d8c4] hover:bg-[#e8f3ec] hover:text-[#317154]"
+            >
+              AGENDA DRE
+            </a>
           </div>
-          <nav className="hidden xl:flex items-center gap-1 rounded-xl bg-white/70 p-1 border border-[#e1e8e2]">
+          <nav className="hidden xl:flex items-center gap-0.5 rounded-xl bg-white/70 p-1 border border-[#e1e8e2]">
             {tabs.map(item => (
               <button
                 key={item.id}
                 onClick={() => setTab(item.id)}
-                className={`flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all ${tab === item.id ? "bg-[#14283f] text-white shadow-sm" : "text-[#61716d] hover:text-[#14283f] hover:bg-[#eef3ef]"}`}
+                className={`flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-[13px] font-semibold transition-all ${tab === item.id ? "bg-[#14283f] text-white shadow-sm" : "text-[#61716d] hover:text-[#14283f] hover:bg-[#eef3ef]"}`}
               >
                 <item.icon className="h-4 w-4" />
                 {item.label}
