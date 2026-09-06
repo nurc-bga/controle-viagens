@@ -227,6 +227,29 @@ function normalizedRecordValue(value?: string | null) {
     .toLowerCase()
     .replace(/[^a-z0-9]/g, "");
 }
+function normalizeDestinationKey(value?: string | null) {
+  return normalizedRecordValue(String(value || "").replace(/\s*[-–—]\s*/g, ", "));
+}
+function destinationLabel(value?: string | null) {
+  const cleaned = String(value || "").replace(/\s*[-–—]\s*/g, ", ").replace(/\s+/g, " ").trim();
+  if (!cleaned) return "Não informado";
+  return cleaned
+    .split(",")
+    .map((part, index) => {
+      const text = part.trim();
+      if (index > 0 && /^[a-z]{2}$/i.test(text)) return text.toUpperCase();
+      return text
+        .toLocaleLowerCase("pt-BR")
+        .split(" ")
+        .map((word, wordIndex) =>
+          wordIndex > 0 && ["da", "das", "de", "do", "dos", "e"].includes(word)
+            ? word
+            : word.charAt(0).toLocaleUpperCase("pt-BR") + word.slice(1)
+        )
+        .join(" ");
+    })
+    .join(", ");
+}
 function recordsShareIdentity(a: RecordRow, b: RecordRow) {
   return Boolean(
     (a.employeeId &&
@@ -997,7 +1020,7 @@ export default function Home() {
   const uniqueVehicles = new Set(filteredTrips.map(t => t.vehiclePlate)).size;
   const uniqueDrivers = new Set(filteredTrips.map(t => t.driverName)).size;
   const uniqueDestinations = new Set(
-    filteredTrips.map(t => t.destination).filter(Boolean)
+    filteredTrips.map(t => normalizeDestinationKey(t.destination)).filter(Boolean)
   ).size;
   const monthData = Object.entries(
     filteredTrips.reduce<Record<string, number>>((acc, trip) => {
@@ -1008,16 +1031,18 @@ export default function Home() {
   )
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([month, total]) => ({ month: monthLabel(month), viagens: total }));
-  const destinationData = Object.entries(
-    filteredTrips.reduce<Record<string, number>>((acc, trip) => {
-      const key = trip.destination || "Não informado";
-      acc[key] = (acc[key] || 0) + 1;
+  const destinationData = Object.values(
+    filteredTrips.reduce<Record<string, { name: string; total: number }>>((acc, trip) => {
+      const key = normalizeDestinationKey(trip.destination) || "naoinformado";
+      const current = acc[key];
+      if (current) current.total += 1;
+      else acc[key] = { name: destinationLabel(trip.destination), total: 1 };
       return acc;
     }, {})
   )
-    .sort(([, a], [, b]) => b - a)
+    .sort((a, b) => b.total - a.total)
     .slice(0, 6)
-    .map(([name, total]) => ({
+    .map(({ name, total }) => ({
       name: name.length > 20 ? `${name.slice(0, 20)}…` : name,
       total,
     }));
