@@ -540,7 +540,7 @@ function ChartTypeSelect({ value, onChange }: { value: ChartType; onChange: (val
 function RankChart({ data, type, color, yAxisWidth = 125 }: { data: Array<{ name: string; total: number }>; type: ChartType; color: string; yAxisWidth?: number }) {
   if (type === "pie") return <ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={data} dataKey="total" nameKey="name" cx="50%" cy="50%" outerRadius={100} paddingAngle={3} stroke="none">{data.map((item, index) => <Cell key={item.name} fill={["#e4684d", "#4f8f77", "#e5b74f", "#7194b0", "#a66a9a", "#7e9b61", "#c88b4a", "#6b7280"][index % 8]} />)}</Pie><Tooltip contentStyle={{ border: "1px solid #e1e8e2", borderRadius: 12, fontSize: 12 }} /></PieChart></ResponsiveContainer>;
   if (type === "line") return <ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 0 }}><CartesianGrid vertical={false} stroke="#edf1ed" /><XAxis dataKey="name" tick={{ fontSize: 9, fill: "#53635f" }} tickLine={false} axisLine={false} interval={0} angle={-25} textAnchor="end" height={65} /><YAxis allowDecimals={false} tick={{ fontSize: 10, fill: "#8b9793" }} tickLine={false} axisLine={false} /><Tooltip contentStyle={{ border: "1px solid #e1e8e2", borderRadius: 12, fontSize: 12 }} /><Line type="monotone" dataKey="total" name="Viagens" stroke={color} strokeWidth={2.5} dot={{ r: 3, fill: color }} /></LineChart></ResponsiveContainer>;
-  return <ResponsiveContainer width="100%" height="100%"><BarChart data={data} layout={type === "bar" ? "vertical" : undefined} margin={{ top: 0, right: 25, left: 15, bottom: type === "column" ? 35 : 0 }}><CartesianGrid horizontal={type === "bar" ? false : true} vertical={type === "column" ? false : true} stroke="#edf1ed" /><XAxis type={type === "bar" ? "number" : "category"} dataKey={type === "bar" ? undefined : "name"} tick={{ fontSize: 9, fill: "#53635f" }} tickLine={false} axisLine={false} interval={0} angle={type === "column" ? -25 : 0} textAnchor={type === "column" ? "end" : "middle"} /><YAxis type={type === "bar" ? "category" : "number"} dataKey={type === "bar" ? "name" : undefined} width={type === "bar" ? yAxisWidth : undefined} allowDecimals={false} tick={{ fontSize: 10, fill: "#8b9793" }} tickLine={false} axisLine={false} /><Tooltip contentStyle={{ border: "1px solid #e1e8e2", borderRadius: 12, fontSize: 12 }} /><Bar dataKey="total" name="Viagens" fill={color} radius={type === "bar" ? [0, 6, 6, 0] : [6, 6, 0, 0]} barSize={20} /></BarChart></ResponsiveContainer>;
+  return <ResponsiveContainer width="100%" height="100%"><BarChart data={data} layout={type === "bar" ? "vertical" : "horizontal"} margin={{ top: 0, right: 25, left: 15, bottom: type === "column" ? 35 : 0 }}><CartesianGrid horizontal={type === "bar" ? false : true} vertical={type === "column" ? false : true} stroke="#edf1ed" /><XAxis type={type === "bar" ? "number" : "category"} dataKey={type === "bar" ? undefined : "name"} tick={{ fontSize: 9, fill: "#53635f" }} tickLine={false} axisLine={false} interval={0} angle={type === "column" ? -25 : 0} textAnchor={type === "column" ? "end" : "middle"} /><YAxis type={type === "bar" ? "category" : "number"} dataKey={type === "bar" ? "name" : undefined} width={type === "bar" ? yAxisWidth : undefined} allowDecimals={false} tick={{ fontSize: 10, fill: "#8b9793" }} tickLine={false} axisLine={false} /><Tooltip contentStyle={{ border: "1px solid #e1e8e2", borderRadius: 12, fontSize: 12 }} /><Bar dataKey="total" name="Viagens" fill={color} radius={type === "bar" ? [0, 6, 6, 0] : [6, 6, 0, 0]} barSize={20} /></BarChart></ResponsiveContainer>;
 }
 
 function FilterBar({
@@ -1096,6 +1096,8 @@ export default function Home() {
       value: filteredTrips.filter(t => t.status === name).length,
     }))
     .filter(item => item.value > 0);
+  const monthChartData = monthData.map(item => ({ name: item.month, total: item.viagens }));
+  const statusChartData = statusData.map(item => ({ name: item.name, total: item.value }));
   const vehicleFilteredTrips = useMemo(
     () =>
       allTrips.filter(
@@ -1453,141 +1455,12 @@ export default function Home() {
             </div>
             <div className="grid lg:grid-cols-[1.6fr_1fr] gap-5">
               <Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)]">
-                <CardHeader className="flex flex-row items-center justify-between pb-1">
-                  <div>
-                    <CardTitle className="font-display text-lg">
-                      Ritmo de viagens
-                    </CardTitle>
-                    <p className="text-xs text-[#75827f] mt-1">
-                      Volume mensal das 52 abas
-                    </p>
-                  </div>
-                  <Badge
-                    variant="outline"
-                    className="border-[#dce5de] text-[#4f8f77]"
-                  >
-                    52 meses
-                  </Badge>
-                </CardHeader>
-                <CardContent className="h-[295px] pt-5">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart
-                      data={monthData}
-                      margin={{ top: 5, right: 10, left: -25, bottom: 0 }}
-                    >
-                      <defs>
-                        <linearGradient
-                          id="tripsFill"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="0%"
-                            stopColor="#e4684d"
-                            stopOpacity={0.25}
-                          />
-                          <stop
-                            offset="100%"
-                            stopColor="#e4684d"
-                            stopOpacity={0}
-                          />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid vertical={false} stroke="#edf1ed" />
-                      <XAxis
-                        dataKey="month"
-                        tick={{ fontSize: 10, fill: "#8b9793" }}
-                        tickLine={false}
-                        axisLine={false}
-                        interval="preserveStartEnd"
-                      />
-                      <YAxis
-                        allowDecimals={false}
-                        tick={{ fontSize: 10, fill: "#8b9793" }}
-                        tickLine={false}
-                        axisLine={false}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          border: "1px solid #e1e8e2",
-                          borderRadius: 12,
-                          fontSize: 12,
-                        }}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="viagens"
-                        stroke="#e4684d"
-                        strokeWidth={2.5}
-                        fill="url(#tripsFill)"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </CardContent>
+                <CardHeader className="flex flex-row items-center justify-between pb-1"><div><CardTitle className="font-display text-lg">Ritmo de viagens</CardTitle><p className="text-xs text-[#75827f] mt-1">Volume mensal das 52 abas</p></div><div className="flex items-center gap-2"><Badge variant="outline" className="hidden sm:inline-flex border-[#dce5de] text-[#4f8f77]">52 meses</Badge><ChartTypeSelect value={monthChartType} onChange={setMonthChartType} /></div></CardHeader>
+                <CardContent className="h-[295px] pt-5"><RankChart data={monthChartData} type={monthChartType} color="#e4684d" yAxisWidth={70} /></CardContent>
               </Card>
               <Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)]">
-                <CardHeader className="pb-1">
-                  <CardTitle className="font-display text-lg">
-                    Situação das viagens
-                  </CardTitle>
-                  <p className="text-xs text-[#75827f] mt-1">
-                    Distribuição por status
-                  </p>
-                </CardHeader>
-                <CardContent className="h-[295px] flex items-center">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={statusData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="47%"
-                        innerRadius={65}
-                        outerRadius={93}
-                        paddingAngle={4}
-                        stroke="none"
-                      >
-                        {statusData.map((entry, index) => (
-                          <Cell
-                            key={entry.name}
-                            fill={COLORS[index % COLORS.length]}
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          border: "1px solid #e1e8e2",
-                          borderRadius: 12,
-                          fontSize: 12,
-                        }}
-                      />
-                      <text
-                        x="50%"
-                        y="45%"
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        className="fill-[#14283f]"
-                        fontSize="26"
-                        fontWeight="700"
-                      >
-                        {filteredTrips.length}
-                      </text>
-                      <text
-                        x="50%"
-                        y="56%"
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        className="fill-[#75827f]"
-                        fontSize="10"
-                      >
-                        viagens
-                      </text>
-                    </PieChart>
-                  </ResponsiveContainer>
-                </CardContent>
+                <CardHeader className="pb-1"><div className="flex items-start justify-between gap-3"><div><CardTitle className="font-display text-lg">Situação das viagens</CardTitle><p className="text-xs text-[#75827f] mt-1">Distribuição por status</p></div><ChartTypeSelect value={statusChartType} onChange={setStatusChartType} /></div></CardHeader>
+                <CardContent className="h-[295px] flex items-center"><RankChart data={statusChartData} type={statusChartType} color="#4f8f77" yAxisWidth={105} /></CardContent>
                 <div className="px-6 pb-5 flex justify-center flex-wrap gap-x-4 gap-y-2">
                   {statusData.map((item, index) => (
                     <span
@@ -1608,53 +1481,8 @@ export default function Home() {
               </Card>
             </div>
             <Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)]">
-              <CardHeader className="pb-1">
-                <CardTitle className="font-display text-lg">
-                  Destinos mais frequentes
-                </CardTitle>
-                <p className="text-xs text-[#75827f] mt-1">
-                  Top 6 por quantidade de deslocamentos
-                </p>
-              </CardHeader>
-              <CardContent className="h-[260px] pt-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={destinationData}
-                    layout="vertical"
-                    margin={{ top: 0, right: 25, left: 15, bottom: 0 }}
-                  >
-                    <CartesianGrid horizontal={false} stroke="#edf1ed" />
-                    <XAxis
-                      type="number"
-                      allowDecimals={false}
-                      tick={{ fontSize: 10, fill: "#8b9793" }}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <YAxis
-                      type="category"
-                      dataKey="name"
-                      width={125}
-                      tick={{ fontSize: 11, fill: "#53635f" }}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        border: "1px solid #e1e8e2",
-                        borderRadius: 12,
-                        fontSize: 12,
-                      }}
-                    />
-                    <Bar
-                      dataKey="total"
-                      fill="#4f8f77"
-                      radius={[0, 6, 6, 0]}
-                      barSize={22}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
+              <CardHeader className="pb-1"><div className="flex items-start justify-between gap-3"><div><CardTitle className="font-display text-lg">Destinos mais frequentes</CardTitle><p className="text-xs text-[#75827f] mt-1">Top 6 por quantidade de deslocamentos</p></div><ChartTypeSelect value={destinationChartType} onChange={setDestinationChartType} /></div></CardHeader>
+              <CardContent className="h-[300px] pt-4"><RankChart data={destinationData} type={destinationChartType} color="#4f8f77" yAxisWidth={125} /></CardContent>
             </Card>
             <div className="grid lg:grid-cols-2 gap-5">
               <Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)]">
