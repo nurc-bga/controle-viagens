@@ -8,6 +8,8 @@ import {
   AreaChart,
   Bar,
   BarChart,
+  Line,
+  LineChart,
   CartesianGrid,
   Cell,
   Pie,
@@ -120,6 +122,7 @@ type TeamMember = {
   createdAt?: string | Date | null;
 };
 type SortState = { key: string; direction: "asc" | "desc" };
+type ChartType = "bar" | "column" | "line" | "pie";
 
 const DEMO_TRIPS: Trip[] = [
   {
@@ -526,6 +529,19 @@ function VehicleMark({ className = "h-6 w-6" }: { className?: string }) {
     />
   );
 }
+function ChartTypeSelect({ value, onChange }: { value: ChartType; onChange: (value: ChartType) => void }) {
+  return (
+    <Select value={value} onValueChange={next => onChange(next as ChartType)}>
+      <SelectTrigger className="h-8 w-[118px] bg-[#fbfcfa] border-[#dce5de] text-[11px] font-semibold text-[#53635f]"><SelectValue /></SelectTrigger>
+      <SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50"><SelectItem value="bar">Barras</SelectItem><SelectItem value="column">Colunas</SelectItem><SelectItem value="line">Linhas</SelectItem><SelectItem value="pie">Pizza</SelectItem></SelectContent>
+    </Select>
+  );
+}
+function RankChart({ data, type, color, yAxisWidth = 125 }: { data: Array<{ name: string; total: number }>; type: ChartType; color: string; yAxisWidth?: number }) {
+  if (type === "pie") return <ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={data} dataKey="total" nameKey="name" cx="50%" cy="50%" outerRadius={100} paddingAngle={3} stroke="none">{data.map((item, index) => <Cell key={item.name} fill={["#e4684d", "#4f8f77", "#e5b74f", "#7194b0", "#a66a9a", "#7e9b61", "#c88b4a", "#6b7280"][index % 8]} />)}</Pie><Tooltip contentStyle={{ border: "1px solid #e1e8e2", borderRadius: 12, fontSize: 12 }} /></PieChart></ResponsiveContainer>;
+  if (type === "line") return <ResponsiveContainer width="100%" height="100%"><LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 0 }}><CartesianGrid vertical={false} stroke="#edf1ed" /><XAxis dataKey="name" tick={{ fontSize: 9, fill: "#53635f" }} tickLine={false} axisLine={false} interval={0} angle={-25} textAnchor="end" height={65} /><YAxis allowDecimals={false} tick={{ fontSize: 10, fill: "#8b9793" }} tickLine={false} axisLine={false} /><Tooltip contentStyle={{ border: "1px solid #e1e8e2", borderRadius: 12, fontSize: 12 }} /><Line type="monotone" dataKey="total" name="Viagens" stroke={color} strokeWidth={2.5} dot={{ r: 3, fill: color }} /></LineChart></ResponsiveContainer>;
+  return <ResponsiveContainer width="100%" height="100%"><BarChart data={data} layout={type === "bar" ? "vertical" : undefined} margin={{ top: 0, right: 25, left: 15, bottom: type === "column" ? 35 : 0 }}><CartesianGrid horizontal={type === "bar" ? false : true} vertical={type === "column" ? false : true} stroke="#edf1ed" /><XAxis type={type === "bar" ? "number" : "category"} dataKey={type === "bar" ? undefined : "name"} tick={{ fontSize: 9, fill: "#53635f" }} tickLine={false} axisLine={false} interval={0} angle={type === "column" ? -25 : 0} textAnchor={type === "column" ? "end" : "middle"} /><YAxis type={type === "bar" ? "category" : "number"} dataKey={type === "bar" ? "name" : undefined} width={type === "bar" ? yAxisWidth : undefined} allowDecimals={false} tick={{ fontSize: 10, fill: "#8b9793" }} tickLine={false} axisLine={false} /><Tooltip contentStyle={{ border: "1px solid #e1e8e2", borderRadius: 12, fontSize: 12 }} /><Bar dataKey="total" name="Viagens" fill={color} radius={type === "bar" ? [0, 6, 6, 0] : [6, 6, 0, 0]} barSize={20} /></BarChart></ResponsiveContainer>;
+}
 
 function FilterBar({
   trips,
@@ -904,6 +920,11 @@ export default function Home() {
   const [recordSearch, setRecordSearch] = useState("");
   const [recordEvent, setRecordEvent] = useState("todos");
   const [recordVehicle, setRecordVehicle] = useState("todos");
+  const [monthChartType, setMonthChartType] = useState<ChartType>("line");
+  const [statusChartType, setStatusChartType] = useState<ChartType>("pie");
+  const [destinationChartType, setDestinationChartType] = useState<ChartType>("bar");
+  const [driverChartType, setDriverChartType] = useState<ChartType>("bar");
+  const [vehicleChartType, setVehicleChartType] = useState<ChartType>("bar");
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [selectedRecord, setSelectedRecord] =
     useState<ConsolidatedRecord | null>(null);
@@ -1638,36 +1659,18 @@ export default function Home() {
             <div className="grid lg:grid-cols-2 gap-5">
               <Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)]">
                 <CardHeader className="pb-1">
-                  <CardTitle className="font-display text-lg">Motoristas que mais dirigem</CardTitle>
-                  <p className="text-xs text-[#75827f] mt-1">Top 8 por quantidade de viagens</p>
+                  <div className="flex items-start justify-between gap-3"><div><CardTitle className="font-display text-lg">Motoristas que mais dirigem</CardTitle><p className="text-xs text-[#75827f] mt-1">Top 8 por quantidade de viagens</p></div><ChartTypeSelect value={driverChartType} onChange={setDriverChartType} /></div>
                 </CardHeader>
                 <CardContent className="h-[310px] pt-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={driverData} layout="vertical" margin={{ top: 0, right: 25, left: 15, bottom: 0 }}>
-                      <CartesianGrid horizontal={false} stroke="#edf1ed" />
-                      <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10, fill: "#8b9793" }} tickLine={false} axisLine={false} />
-                      <YAxis type="category" dataKey="name" width={135} tick={{ fontSize: 10, fill: "#53635f" }} tickLine={false} axisLine={false} />
-                      <Tooltip contentStyle={{ border: "1px solid #e1e8e2", borderRadius: 12, fontSize: 12 }} />
-                      <Bar dataKey="total" name="Viagens" fill="#e4684d" radius={[0, 6, 6, 0]} barSize={20} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  <RankChart data={driverData} type={driverChartType} color="#e4684d" yAxisWidth={135} />
                 </CardContent>
               </Card>
               <Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)]">
                 <CardHeader className="pb-1">
-                  <CardTitle className="font-display text-lg">Veículos mais utilizados</CardTitle>
-                  <p className="text-xs text-[#75827f] mt-1">Top 8 por quantidade de viagens</p>
+                  <div className="flex items-start justify-between gap-3"><div><CardTitle className="font-display text-lg">Veículos mais utilizados</CardTitle><p className="text-xs text-[#75827f] mt-1">Top 8 por quantidade de viagens</p></div><ChartTypeSelect value={vehicleChartType} onChange={setVehicleChartType} /></div>
                 </CardHeader>
                 <CardContent className="h-[310px] pt-4">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={vehicleData} layout="vertical" margin={{ top: 0, right: 25, left: 15, bottom: 0 }}>
-                      <CartesianGrid horizontal={false} stroke="#edf1ed" />
-                      <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10, fill: "#8b9793" }} tickLine={false} axisLine={false} />
-                      <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 10, fill: "#53635f" }} tickLine={false} axisLine={false} />
-                      <Tooltip contentStyle={{ border: "1px solid #e1e8e2", borderRadius: 12, fontSize: 12 }} />
-                      <Bar dataKey="total" name="Viagens" fill="#4f8f77" radius={[0, 6, 6, 0]} barSize={20} />
-                    </BarChart>
-                  </ResponsiveContainer>
+                  <RankChart data={vehicleData} type={vehicleChartType} color="#4f8f77" yAxisWidth={100} />
                 </CardContent>
               </Card>
             </div>
