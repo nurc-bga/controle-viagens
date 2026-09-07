@@ -1046,6 +1046,29 @@ export default function Home() {
       name: name.length > 20 ? `${name.slice(0, 20)}…` : name,
       total,
     }));
+  const driverData = Object.values(
+    filteredTrips.reduce<Record<string, { name: string; total: number }>>((acc, trip) => {
+      const displayName = String(trip.driverName || "Não informado").trim() || "Não informado";
+      const key = normalizedRecordValue(displayName) || "naoinformado";
+      if (acc[key]) acc[key].total += 1;
+      else acc[key] = { name: displayName, total: 1 };
+      return acc;
+    }, {})
+  )
+    .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name, "pt-BR"))
+    .slice(0, 8)
+    .map(item => ({ ...item, name: item.name.length > 24 ? `${item.name.slice(0, 24)}…` : item.name }));
+  const vehicleData = Object.values(
+    filteredTrips.reduce<Record<string, { name: string; total: number }>>((acc, trip) => {
+      const displayName = String(trip.vehiclePlate || "Não informado").trim().toUpperCase() || "Não informado";
+      const key = normalizedRecordValue(displayName) || "naoinformado";
+      if (acc[key]) acc[key].total += 1;
+      else acc[key] = { name: displayName, total: 1 };
+      return acc;
+    }, {})
+  )
+    .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name, "pt-BR"))
+    .slice(0, 8);
   const statusData = ["Concluída", "Em andamento", "Cancelada"]
     .map(name => ({
       name,
@@ -1612,6 +1635,42 @@ export default function Home() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
+            <div className="grid lg:grid-cols-2 gap-5">
+              <Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)]">
+                <CardHeader className="pb-1">
+                  <CardTitle className="font-display text-lg">Motoristas que mais dirigem</CardTitle>
+                  <p className="text-xs text-[#75827f] mt-1">Top 8 por quantidade de viagens</p>
+                </CardHeader>
+                <CardContent className="h-[310px] pt-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={driverData} layout="vertical" margin={{ top: 0, right: 25, left: 15, bottom: 0 }}>
+                      <CartesianGrid horizontal={false} stroke="#edf1ed" />
+                      <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10, fill: "#8b9793" }} tickLine={false} axisLine={false} />
+                      <YAxis type="category" dataKey="name" width={135} tick={{ fontSize: 10, fill: "#53635f" }} tickLine={false} axisLine={false} />
+                      <Tooltip contentStyle={{ border: "1px solid #e1e8e2", borderRadius: 12, fontSize: 12 }} />
+                      <Bar dataKey="total" name="Viagens" fill="#e4684d" radius={[0, 6, 6, 0]} barSize={20} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+              <Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)]">
+                <CardHeader className="pb-1">
+                  <CardTitle className="font-display text-lg">Veículos mais utilizados</CardTitle>
+                  <p className="text-xs text-[#75827f] mt-1">Top 8 por quantidade de viagens</p>
+                </CardHeader>
+                <CardContent className="h-[310px] pt-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={vehicleData} layout="vertical" margin={{ top: 0, right: 25, left: 15, bottom: 0 }}>
+                      <CartesianGrid horizontal={false} stroke="#edf1ed" />
+                      <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10, fill: "#8b9793" }} tickLine={false} axisLine={false} />
+                      <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 10, fill: "#53635f" }} tickLine={false} axisLine={false} />
+                      <Tooltip contentStyle={{ border: "1px solid #e1e8e2", borderRadius: 12, fontSize: 12 }} />
+                      <Bar dataKey="total" name="Viagens" fill="#4f8f77" radius={[0, 6, 6, 0]} barSize={20} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
           </section>
         )}
 
