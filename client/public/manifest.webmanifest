@@ -1,6 +1,6 @@
 {
-  "name": "Controle de Viagens",
-  "short_name": "Controle de Viagens",
+  "name": "Histórico de Viagens",
+  "short_name": "Histórico de Viagens",
   "description": "Painel operacional de controle de viagens",
   "start_url": "/",
   "display": "standalone",

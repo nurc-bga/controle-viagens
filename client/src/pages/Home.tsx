@@ -1211,7 +1211,7 @@ export default function Home() {
               Painel operacional
             </p>
             <h1 className="font-display text-4xl md:text-5xl font-bold leading-tight mt-3">
-              Controle de
+              Histórico de
               <br />
               <span className="text-[#ef876f]">Viagens.</span>
             </h1>
@@ -1265,7 +1265,7 @@ export default function Home() {
             </div>
             <div className="min-w-0">
               <div className="font-display font-bold text-lg leading-none whitespace-nowrap">
-                Controle <span className="text-[#e4684d]">de Viagens</span>
+                Histórico <span className="text-[#e4684d]">de Viagens</span>
               </div>
               <div className="text-[10px] uppercase tracking-[0.16em] text-[#75827f] mt-1 whitespace-nowrap">
                 Painel de operações
@@ -2581,7 +2581,7 @@ export default function Home() {
         </DialogContent>
       </Dialog>
       <footer className="no-print max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-8 text-xs text-[#9aa6a2] flex flex-wrap justify-between gap-2">
-        <span>Controle de Viagens · dados em nuvem</span>
+        <span>Histórico de Viagens · dados em nuvem</span>
         <span>Período de análise: maio/2022 a agosto/2026</span>
       </footer>
     </div>
