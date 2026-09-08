@@ -1259,7 +1259,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#f5f6f2] text-[#14283f]">
       <header className="no-print sticky top-0 z-30 border-b border-[#e1e8e2] bg-[#f5f6f2]/95 backdrop-blur-md">
-        <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 min-h-[74px] flex flex-wrap items-center justify-between gap-3 py-3 xl:h-[74px] xl:flex-nowrap xl:py-0">
+        <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 min-h-[74px] flex flex-wrap items-center justify-between gap-3 py-3 lg:h-[74px] lg:flex-nowrap lg:py-0">
           <div className="order-1 flex items-center gap-3 shrink-0 min-w-0">
             <div className="h-10 w-10 rounded-xl bg-[#14283f] text-white flex items-center justify-center shadow-sm">
               <VehicleMark className="h-6 w-6 text-white" />
@@ -1281,12 +1281,12 @@ export default function Home() {
               AGENDA DRE
             </a>
           </div>
-          <nav className="order-3 flex w-full max-w-full basis-full min-w-0 items-center gap-0.5 overflow-x-auto rounded-xl bg-white/70 p-1 border border-[#e1e8e2] scrollbar-none xl:order-2 xl:flex-1 xl:basis-auto xl:justify-center xl:overflow-x-auto">
+          <nav className="order-3 flex w-full max-w-full basis-full min-w-0 items-center gap-0.5 overflow-x-auto rounded-xl bg-white/70 p-1 border border-[#e1e8e2] scrollbar-none lg:order-2 lg:flex-1 lg:basis-auto lg:justify-center lg:overflow-visible">
             {tabs.map(item => (
               <button
                 key={item.id}
                 onClick={() => setTab(item.id)}
-                className={`flex shrink-0 items-center gap-1 sm:gap-1.5 rounded-lg px-2 sm:px-2.5 py-2 text-[12px] sm:text-[13px] font-semibold transition-all ${tab === item.id ? "bg-[#14283f] text-white shadow-sm" : "text-[#61716d] hover:text-[#14283f] hover:bg-[#eef3ef]"}`}
+                className={`flex shrink-0 items-center gap-1 rounded-lg px-1.5 sm:px-2 py-2 text-[12px] sm:text-[13px] font-semibold transition-all ${tab === item.id ? "bg-[#14283f] text-white shadow-sm" : "text-[#61716d] hover:text-[#14283f] hover:bg-[#eef3ef]"}`}
               >
                 <item.icon className="h-4 w-4" />
                 {item.label}
