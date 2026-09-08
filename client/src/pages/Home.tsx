@@ -925,6 +925,7 @@ export default function Home() {
   const [driverChartType, setDriverChartType] = useState<ChartType>("bar");
   const [vehicleChartType, setVehicleChartType] = useState<ChartType>("bar");
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
+  const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [selectedRecord, setSelectedRecord] =
     useState<ConsolidatedRecord | null>(null);
   const [memberDialog, setMemberDialog] = useState(false);
@@ -1280,12 +1281,12 @@ export default function Home() {
               AGENDA DRE
             </a>
           </div>
-          <nav className="order-3 flex basis-full min-w-0 items-center gap-0.5 overflow-x-auto rounded-xl bg-white/70 p-1 border border-[#e1e8e2] scrollbar-none xl:order-2 xl:basis-auto xl:overflow-visible">
+          <nav className="order-3 flex w-full max-w-full basis-full min-w-0 items-center gap-0.5 overflow-x-auto rounded-xl bg-white/70 p-1 border border-[#e1e8e2] scrollbar-none xl:order-2 xl:flex-1 xl:basis-auto xl:justify-center xl:overflow-x-auto">
             {tabs.map(item => (
               <button
                 key={item.id}
                 onClick={() => setTab(item.id)}
-                className={`flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-2 text-[13px] font-semibold transition-all ${tab === item.id ? "bg-[#14283f] text-white shadow-sm" : "text-[#61716d] hover:text-[#14283f] hover:bg-[#eef3ef]"}`}
+                className={`flex shrink-0 items-center gap-1 sm:gap-1.5 rounded-lg px-2 sm:px-2.5 py-2 text-[12px] sm:text-[13px] font-semibold transition-all ${tab === item.id ? "bg-[#14283f] text-white shadow-sm" : "text-[#61716d] hover:text-[#14283f] hover:bg-[#eef3ef]"}`}
               >
                 <item.icon className="h-4 w-4" />
                 {item.label}
@@ -1539,7 +1540,7 @@ export default function Home() {
             {tripView === "table" ? (
               <Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)] overflow-hidden">
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left">
+                  <table className="w-full table-fixed text-left">
                     <thead className="bg-[#f7f9f6] border-b border-[#e5ebe5]">
                       <tr>
                         <SortHeader
@@ -1596,30 +1597,37 @@ export default function Home() {
                       {filteredTrips.map(trip => (
                         <tr
                           key={trip.id}
-                          className="hover:bg-[#fbfcfa] transition-colors"
+                          tabIndex={0}
+                          role="button"
+                          onClick={() => setSelectedTrip(trip)}
+                          onKeyDown={event => {
+                            if (event.key === "Enter" || event.key === " ") setSelectedTrip(trip);
+                          }}
+                          className="cursor-pointer hover:bg-[#eef4f0] focus:bg-[#eef4f0] focus:outline-none transition-colors"
+                          title="Clique para ver todos os detalhes"
                         >
-                          <td className="px-4 py-4 text-sm font-semibold whitespace-nowrap">
+                          <td className="w-[13%] px-3 py-4 text-sm font-semibold whitespace-nowrap">
                             {formatDate(trip.tripDate)}
                           </td>
-                          <td className="px-4 py-4 text-xs text-[#4f8f77] whitespace-nowrap">
-                            {trip.sourceSheet || "—"}
+                          <td className="w-[13%] px-3 py-4 text-xs text-[#4f8f77]">
+                            <span className="block truncate">{trip.sourceSheet || "—"}</span>
                           </td>
-                          <td className="px-4 py-4 whitespace-nowrap">
-                            <p className="text-sm font-semibold">
+                          <td className="w-[17%] px-3 py-4">
+                            <p className="text-sm font-semibold truncate" title={trip.vehiclePlate}>
                               {trip.vehiclePlate}
                             </p>
-                            <p className="text-[11px] text-[#75827f]">
+                            <p className="text-[11px] text-[#75827f] truncate" title={trip.vehicleModel || "Modelo não informado"}>
                               {trip.vehicleModel || "Modelo não informado"}
                             </p>
                           </td>
-                          <td className="px-4 py-4 text-sm whitespace-nowrap">
-                            {trip.driverName}
+                          <td className="w-[20%] px-3 py-4 text-sm">
+                            <span className="block truncate" title={trip.driverName}>{trip.driverName}</span>
                           </td>
-                          <td className="px-4 py-4 text-sm min-w-[170px]">
-                            {trip.destination || "—"}
+                          <td className="w-[19%] px-3 py-4 text-sm">
+                            <span className="block truncate" title={trip.destination || "—"}>{trip.destination || "—"}</span>
                           </td>
-                          <td className="px-4 py-4 text-sm text-[#61716d] min-w-[220px]">
-                            {trip.purpose || "—"}
+                          <td className="w-[18%] px-3 py-4 text-sm text-[#61716d]">
+                            <span className="block truncate" title={trip.purpose || "—"}>{trip.purpose || "—"}</span>
                           </td>
                         </tr>
                       ))}
@@ -2348,22 +2356,37 @@ export default function Home() {
         </DialogContent>
       </Dialog>
       <Dialog
+        open={Boolean(selectedTrip)}
+        onOpenChange={open => !open && setSelectedTrip(null)}
+      >
+        <DialogContent className="sm:max-w-[760px] max-h-[88vh] overflow-y-auto bg-white">
+          <DialogHeader>
+            <p className="text-xs uppercase tracking-[0.16em] text-[#4f8f77] font-semibold">Detalhes completos da viagem</p>
+            <DialogTitle className="font-display text-2xl md:text-3xl font-bold mt-1">{selectedTrip ? formatDate(selectedTrip.tripDate) : "Viagem"}</DialogTitle>
+            <p className="text-sm text-[#75827f] mt-1">Clique fora da janela ou pressione Esc para fechar.</p>
+          </DialogHeader>
+          {selectedTrip && (
+            <dl className="grid gap-3 sm:grid-cols-2 mt-2">
+              <RecordDetailField label="Data da viagem" value={formatDate(selectedTrip.tripDate)} />
+              <RecordDetailField label="Aba mensal" value={selectedTrip.sourceSheet} />
+              <RecordDetailField label="Veículo" value={`${selectedTrip.vehiclePlate} · ${selectedTrip.vehicleModel || "Modelo não informado"}`} />
+              <RecordDetailField label="Motorista" value={selectedTrip.driverName} />
+              <RecordDetailField label="Origem" value={selectedTrip.origin} />
+              <RecordDetailField label="Destino" value={selectedTrip.destination} />
+              <RecordDetailField label="Ação / finalidade" value={selectedTrip.purpose} />
+              <RecordDetailField label="Distância" value={`${selectedTrip.distanceKm ?? 0} km`} />
+              <RecordDetailField label="Duração" value={`${selectedTrip.durationMinutes ?? 0} minutos`} />
+              <RecordDetailField label="Situação" value={selectedTrip.status} />
+              <div className="sm:col-span-2"><RecordDetailField label="Observações" value={selectedTrip.notes} /></div>
+            </dl>
+          )}
+        </DialogContent>
+      </Dialog>
+      <Dialog
         open={Boolean(selectedVehicle)}
         onOpenChange={open => !open && setSelectedVehicle(null)}
       >
-        <DialogContent
-          style={{
-            inset: 0,
-            left: 0,
-            top: 0,
-            transform: "none",
-            width: "100vw",
-            height: "100vh",
-            maxWidth: "none",
-            maxHeight: "none",
-          }}
-          className="fixed rounded-none border-0 bg-[#f5f6f2] p-0 overflow-y-auto"
-        >
+        <DialogContent className="!fixed !inset-0 !left-0 !top-0 !z-[60] !m-0 !h-screen !w-screen !max-h-none !max-w-none !translate-x-0 !translate-y-0 rounded-none border-0 bg-[#f5f6f2] p-0 overflow-y-auto">
           <div className="max-w-[1200px] mx-auto w-full p-5 md:p-10">
             <DialogHeader className="border-b border-[#dce5de] pb-6">
               <div className="flex flex-wrap items-end justify-between gap-4">
