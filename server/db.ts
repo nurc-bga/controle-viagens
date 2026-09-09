@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, not } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { appSettings, departureArrivalRecords, InsertTrip, InsertUser, trips, users, vehicles } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -119,7 +119,7 @@ export async function listDepartureArrivalRecords() {
 export async function listUsers() {
   const db = await getDb();
   if (!db) return [];
-  return db.select({ id: users.id, name: users.name, email: users.email, role: users.role, active: users.active, lastSignedIn: users.lastSignedIn, createdAt: users.createdAt }).from(users).orderBy(users.name);
+  return db.select({ id: users.id, name: users.name, email: users.email, role: users.role, active: users.active, lastSignedIn: users.lastSignedIn, createdAt: users.createdAt }).from(users).where(not(eq(users.role, "admin"))).orderBy(users.name);
 }
 
 export async function getUserById(id: number) {
@@ -148,7 +148,7 @@ export async function markUserSignedIn(id: number) {
   await db.update(users).set({ lastSignedIn: new Date() }).where(eq(users.id, id));
 }
 
-export async function updateUserById(id: number, data: { name: string; email: string; role: "user" | "admin" }, openId?: string) {
+export async function updateUserById(id: number, data: { name: string; email: string; role: "user" | "coordenador" | "diretor" | "admin" }, openId?: string) {
   const db = await getDb();
   if (!db) throw new Error("Banco de dados indisponível");
   await db.update(users).set(openId ? { ...data, openId } : data).where(eq(users.id, id));

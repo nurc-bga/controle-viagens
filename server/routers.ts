@@ -134,14 +134,21 @@ export const appRouter = router({
   vehicles: router({ list: visitorProcedure.query(() => listVehicles()) }),
   departureArrival: router({ list: visitorProcedure.query(() => listDepartureArrivalRecords()) }),
   team: router({
-    list: protectedProcedure.query(({ ctx }) => ctx.user.role === "admin" ? listUsers() : []),
-    addMember: adminProcedure.input(z.object({ name: z.string().min(2), email: z.string().email(), role: z.enum(["user", "admin"]) })).mutation(async ({ input }) => {
+    list: protectedProcedure.query(() => listUsers()),
+    addMember: protectedProcedure.input(z.object({ name: z.string().min(2), email: z.string().email(), role: z.enum(["user", "coordenador", "diretor", "admin"]) })).mutation(async ({ ctx, input }) => {
+      const canAdd = ctx.user.role === "admin" || ctx.user.role === "diretor" || ctx.user.role === "coordenador";
+      const canAssign = ctx.user.role === "admin"
+        || (ctx.user.role === "diretor" && (input.role === "user" || input.role === "coordenador"))
+        || (ctx.user.role === "coordenador" && input.role === "user");
+      if (!canAdd || !canAssign) {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Seu cargo não permite adicionar este tipo de usuário." });
+      }
       const email = input.email.toLowerCase();
       const inviteOpenId = `invite:${createHash("sha256").update(email).digest("hex").slice(0, 56)}`;
       await upsertUser({ openId: inviteOpenId, name: input.name, email, loginMethod: "admin-invite", role: input.role });
       return { success: true } as const;
     }),
-    updateMember: adminProcedure.input(z.object({ id: z.number().int().positive(), name: z.string().min(2), email: z.string().email(), role: z.enum(["user", "admin"]) })).mutation(async ({ input }) => {
+    updateMember: adminProcedure.input(z.object({ id: z.number().int().positive(), name: z.string().min(2), email: z.string().email(), role: z.enum(["user", "coordenador", "diretor", "admin"]) })).mutation(async ({ input }) => {
       const member = await getUserById(input.id);
       if (!member) throw new TRPCError({ code: "NOT_FOUND", message: "Membro não encontrado." });
       const email = input.email.toLowerCase();

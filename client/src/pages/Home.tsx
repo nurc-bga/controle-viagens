@@ -114,7 +114,7 @@ type TeamMember = {
   id: number;
   name?: string | null;
   email?: string | null;
-  role: "admin" | "user";
+  role: "admin" | "user" | "coordenador" | "diretor";
   active: number;
   lastSignedIn?: string | Date | null;
   createdAt?: string | Date | null;
@@ -840,7 +840,7 @@ export default function Home() {
     enabled: canViewData,
   });
   const teamQuery = trpc.team.list.useQuery(undefined, {
-    enabled: Boolean(user && user.role === "admin"),
+    enabled: Boolean(user),
   });
   const visitorMutation = trpc.auth.setVisitorAccess.useMutation({
     onSuccess: enabled => {
@@ -932,7 +932,7 @@ export default function Home() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [memberName, setMemberName] = useState("");
   const [memberEmail, setMemberEmail] = useState("");
-  const [memberRole, setMemberRole] = useState<"user" | "admin">("user");
+  const [memberRole, setMemberRole] = useState<"user" | "coordenador" | "diretor" | "admin">("user");
 
   const rawTrips = (tripsQuery.data ?? []) as Trip[];
   const allTrips = rawTrips;
@@ -1144,6 +1144,12 @@ export default function Home() {
     visibleVehicleKeys.has(item.plate)
   );
   const team = (teamQuery.data ?? []) as TeamMember[];
+  const canAddMembers = user?.role === "admin" || user?.role === "diretor" || user?.role === "coordenador";
+  const assignableRoles = user?.role === "admin"
+    ? (["user", "coordenador", "diretor", "admin"] as const)
+    : user?.role === "diretor"
+      ? (["user", "coordenador"] as const)
+      : (["user"] as const);
   const selectedVehicleTrips = selectedVehicle
     ? vehicleFilteredTrips
         .filter(t => t.vehiclePlate === selectedVehicle.plate)
@@ -1307,7 +1313,7 @@ export default function Home() {
                       {user.name || "Usuário"}
                     </p>
                     <p className="text-[11px] text-[#75827f]">
-                      {user.role === "admin" ? "Administrador" : "Usuário"}
+                      {{ admin: "Administrador", user: "Usuário", coordenador: "Coordenador(a)", diretor: "Diretor(a)" }[user.role]}
                     </p>
                   </div>
                 </>
@@ -2049,35 +2055,21 @@ export default function Home() {
 
         {tab === "equipe" && (
           <section className="mt-6">
-            {user?.role !== "admin" ? (
-              <Card className="border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)]">
-                <CardContent className="p-12 text-center">
-                  <ShieldCheck className="h-10 w-10 text-[#e5b74f] mx-auto" />
-                  <h3 className="font-display font-bold text-xl mt-4">
-                    Área restrita
-                  </h3>
-                  <p className="text-sm text-[#75827f] mt-2">
-                    A visualização da equipe está disponível apenas para
-                    administradores.
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <>
+            <>
                 <div className="flex items-center justify-between mb-4">
                   <p className="text-sm text-[#75827f]">
                     <strong className="text-[#14283f]">{team.length}</strong>{" "}
                     usuários com permissão de acesso
                   </p>
                   <div className="flex gap-2">
-                    <Button
+                    {canAddMembers && <Button
                       onClick={() => setMemberDialog(true)}
                       className="no-print bg-[#e4684d] hover:bg-[#c9533b] text-white gap-2"
                     >
                       <UserPlus className="h-4 w-4" />
                       Adicionar Membro
-                    </Button>
-                    <Button
+                    </Button>}
+                    {user?.role === "admin" && <Button
                       onClick={() =>
                         visitorMutation.mutate({
                           enabled: visitorAccessQuery.data !== true,
@@ -2092,8 +2084,8 @@ export default function Home() {
                       />
                       Visitantes:{" "}
                       {visitorAccessQuery.data ? "Ativo" : "Inativo"}
-                    </Button>
-                    <PrintButton label="Imprimir equipe" />
+                    </Button>}
+                    {user?.role === "admin" && <PrintButton label="Imprimir equipe" />}
                   </div>
                 </div>
                 <Card className="print-card border-0 shadow-[0_8px_24px_rgba(20,40,63,0.06)] overflow-hidden">
@@ -2149,9 +2141,7 @@ export default function Home() {
                                 {member.role === "admin" && (
                                   <ShieldCheck className="h-3 w-3" />
                                 )}
-                                {member.role === "admin"
-                                  ? "Administrador"
-                                  : "Usuário"}
+                                {{ admin: "Administrador", user: "Usuário", coordenador: "Coordenador(a)", diretor: "Diretor(a)" }[member.role]}
                               </span>
                             </td>
                             <td className="px-5 py-4 text-sm text-[#61716d]">
@@ -2161,7 +2151,7 @@ export default function Home() {
                               {formatDate(member.createdAt)}
                             </td>
                             <td className="px-5 py-4">
-                              <div className="flex items-center gap-1">
+                              {user?.role === "admin" && <div className="flex items-center gap-1">
                                 <Button
                                   type="button"
                                   variant="outline"
@@ -2227,7 +2217,7 @@ export default function Home() {
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
-                              </div>
+                              </div>}
                             </td>
                           </tr>
                         ))}
@@ -2245,8 +2235,7 @@ export default function Home() {
                     </table>
                   </div>
                 </Card>
-              </>
-            )}
+            </>
           </section>
         )}
       </main>
@@ -2315,15 +2304,18 @@ export default function Home() {
               <Select
                 value={memberRole}
                 onValueChange={value =>
-                  setMemberRole(value as "user" | "admin")
+                  setMemberRole(value as "user" | "coordenador" | "diretor" | "admin")
                 }
               >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50">
-                  <SelectItem value="user">Usuário</SelectItem>
-                  <SelectItem value="admin">Administrador</SelectItem>
+                  {assignableRoles.map(role => (
+                    <SelectItem key={role} value={role}>
+                      {{ user: "Usuário", coordenador: "Coordenador(a)", diretor: "Diretor(a)", admin: "Administrador" }[role]}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </label>
