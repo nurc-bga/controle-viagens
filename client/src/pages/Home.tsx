@@ -1143,7 +1143,12 @@ export default function Home() {
   const vehicleCards = allVehicleCards.filter(item =>
     visibleVehicleKeys.has(item.plate)
   );
-  const team = (teamQuery.data ?? []) as TeamMember[];
+  const team = [...((teamQuery.data ?? []) as TeamMember[])].sort((a, b) =>
+    (a.name || "").localeCompare(b.name || "", "pt-BR", {
+      sensitivity: "base",
+      numeric: true,
+    })
+  );
   const canAddMembers = user?.role === "admin" || user?.role === "diretor" || user?.role === "coordenador";
   const assignableRoles = user?.role === "admin"
     ? (["user", "coordenador", "diretor", "admin"] as const)
