@@ -589,7 +589,8 @@ function FilterBar({
     ) as string[]
   ) as string[];
   return (
-    <div className="no-print flex flex-wrap items-end gap-3 rounded-2xl bg-white border border-[#e3e9e4] p-4 shadow-[0_5px_18px_rgba(20,40,63,0.04)]">
+    <div className="no-print grid gap-3 rounded-2xl bg-white border border-[#e3e9e4] p-4 shadow-[0_5px_18px_rgba(20,40,63,0.04)]">
+      <div className="flex flex-wrap items-end gap-3">
       <div className="flex items-center gap-2 text-[#4f8f77] self-center mr-1">
         <Filter className="h-4 w-4" />
         <span className="text-xs font-semibold uppercase tracking-[0.12em]">
@@ -618,6 +619,8 @@ function FilterBar({
           className="h-9 rounded-lg border border-[#dce5de] bg-[#fbfcfa] px-2 text-sm font-normal normal-case tracking-normal text-[#14283f]"
         />
       </label>
+      </div>
+      <div className="flex flex-wrap items-end gap-3">
       <label className="grid gap-1 min-w-[145px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
         Veículo
         <Select value={vehicle} onValueChange={setVehicle}>
@@ -650,6 +653,8 @@ function FilterBar({
           </SelectContent>
         </Select>
       </label>
+      </div>
+      <div className="flex flex-wrap items-end justify-between gap-3">
       <label className="grid gap-1 min-w-[145px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
         Status
         <Select value={status} onValueChange={setStatus}>
@@ -684,10 +689,11 @@ function FilterBar({
         variant="ghost"
         size="sm"
         onClick={onClear}
-        className="h-9 text-[#75827f] hover:text-[#e4684d]"
+        className="ml-auto h-8 px-2 text-xs text-[#75827f] hover:text-[#e4684d]"
       >
         Limpar
       </Button>
+      </div>
     </div>
   );
 }
@@ -1297,10 +1303,11 @@ export default function Home() {
               <button
                 key={item.id}
                 onClick={() => setTab(item.id)}
-                className={`flex shrink-0 items-center gap-1 rounded-lg px-1.5 sm:px-2 py-2 text-[12px] sm:text-[13px] font-semibold transition-all ${tab === item.id ? "bg-[#14283f] text-white shadow-sm" : "text-[#61716d] hover:text-[#14283f] hover:bg-[#eef3ef]"}`}
+                aria-label={item.label}
+                title={item.label}
+                className={`flex shrink-0 items-center justify-center rounded-lg px-2.5 py-2 transition-all ${tab === item.id ? "bg-[#14283f] text-white shadow-sm" : "text-[#61716d] hover:text-[#14283f] hover:bg-[#eef3ef]"}`}
               >
                 <item.icon className="h-4 w-4" />
-                {item.label}
               </button>
             ))}
           </nav>
