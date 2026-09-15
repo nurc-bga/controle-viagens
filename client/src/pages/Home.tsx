@@ -1305,9 +1305,10 @@ export default function Home() {
                 onClick={() => setTab(item.id)}
                 aria-label={item.label}
                 title={item.label}
-                className={`flex shrink-0 items-center justify-center rounded-lg px-2.5 py-2 transition-all ${tab === item.id ? "bg-[#14283f] text-white shadow-sm" : "text-[#61716d] hover:text-[#14283f] hover:bg-[#eef3ef]"}`}
+                className={`flex shrink-0 items-center justify-center gap-1 rounded-lg px-2 py-2 text-[13px] transition-all ${tab === item.id ? "bg-[#14283f] text-white shadow-sm" : "text-[#61716d] hover:text-[#14283f] hover:bg-[#eef3ef]"}`}
               >
                 <item.icon className="h-4 w-4" />
+                <span className="hidden lg:inline">{item.label}</span>
               </button>
             ))}
           </nav>
