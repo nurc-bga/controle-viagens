@@ -589,15 +589,15 @@ function FilterBar({
     ) as string[]
   ) as string[];
   return (
-    <div className="no-print grid gap-3 rounded-2xl bg-white border border-[#e3e9e4] p-4 shadow-[0_5px_18px_rgba(20,40,63,0.04)]">
-      <div className="flex flex-wrap items-end gap-3">
-      <div className="flex items-center gap-2 text-[#4f8f77] self-center mr-1">
+    <div className="no-print grid gap-3 rounded-2xl bg-white border border-[#e3e9e4] p-3 sm:p-4 shadow-[0_5px_18px_rgba(20,40,63,0.04)]">
+      <div className="grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] items-end gap-2 sm:flex sm:flex-wrap sm:gap-3">
+      <div className="flex min-w-0 items-center gap-1.5 text-[#4f8f77] self-center mr-1 whitespace-nowrap">
         <Filter className="h-4 w-4" />
         <span className="text-xs font-semibold uppercase tracking-[0.12em]">
           Filtros
         </span>
       </div>
-      <label className="grid gap-1 text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
+      <label className="grid min-w-0 gap-1 text-[10px] sm:text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
         De
         <input
           type="date"
@@ -605,10 +605,10 @@ function FilterBar({
           max={DATE_MAX}
           value={from}
           onChange={e => setFrom(e.target.value)}
-          className="h-9 rounded-lg border border-[#dce5de] bg-[#fbfcfa] px-2 text-sm font-normal normal-case tracking-normal text-[#14283f]"
+          className="h-9 w-full min-w-0 rounded-lg border border-[#dce5de] bg-[#fbfcfa] px-1.5 sm:px-2 text-[11px] sm:text-sm font-normal normal-case tracking-normal text-[#14283f]"
         />
       </label>
-      <label className="grid gap-1 text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
+      <label className="grid min-w-0 gap-1 text-[10px] sm:text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
         Até
         <input
           type="date"
@@ -616,15 +616,15 @@ function FilterBar({
           max={DATE_MAX}
           value={to}
           onChange={e => setTo(e.target.value)}
-          className="h-9 rounded-lg border border-[#dce5de] bg-[#fbfcfa] px-2 text-sm font-normal normal-case tracking-normal text-[#14283f]"
+          className="h-9 w-full min-w-0 rounded-lg border border-[#dce5de] bg-[#fbfcfa] px-1.5 sm:px-2 text-[11px] sm:text-sm font-normal normal-case tracking-normal text-[#14283f]"
         />
       </label>
       </div>
-      <div className="flex flex-wrap items-end gap-3">
-      <label className="grid gap-1 min-w-[145px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
+      <div className="grid grid-cols-2 items-end gap-2 sm:flex sm:flex-wrap sm:gap-3">
+      <label className="grid min-w-0 gap-1 text-[10px] sm:text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em] sm:min-w-[145px]">
         Veículo
         <Select value={vehicle} onValueChange={setVehicle}>
-          <SelectTrigger className="h-9 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal">
+          <SelectTrigger className="h-9 w-full min-w-0 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal">
             <SelectValue placeholder="Todos" />
           </SelectTrigger>
           <SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50">
@@ -637,10 +637,10 @@ function FilterBar({
           </SelectContent>
         </Select>
       </label>
-      <label className="grid gap-1 min-w-[165px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
+      <label className="grid min-w-0 gap-1 text-[10px] sm:text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em] sm:min-w-[165px]">
         Motorista
         <Select value={driver} onValueChange={setDriver}>
-          <SelectTrigger className="h-9 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal">
+          <SelectTrigger className="h-9 w-full min-w-0 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal">
             <SelectValue placeholder="Todos" />
           </SelectTrigger>
           <SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50">
@@ -654,11 +654,11 @@ function FilterBar({
         </Select>
       </label>
       </div>
-      <div className="flex flex-wrap items-end justify-between gap-3">
-      <label className="grid gap-1 min-w-[145px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
+      <div className="grid grid-cols-2 items-end gap-2 sm:flex sm:flex-wrap sm:justify-between sm:gap-3">
+      <label className="grid min-w-0 gap-1 text-[10px] sm:text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em] sm:min-w-[145px]">
         Status
         <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="h-9 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal">
+          <SelectTrigger className="h-9 w-full min-w-0 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal">
             <SelectValue placeholder="Todos" />
           </SelectTrigger>
           <SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50">
@@ -669,10 +669,10 @@ function FilterBar({
           </SelectContent>
         </Select>
       </label>
-      <label className="grid gap-1 min-w-[165px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
+      <label className="grid min-w-0 gap-1 text-[10px] sm:text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em] sm:min-w-[165px]">
         Destino
         <Select value={destination} onValueChange={setDestination}>
-          <SelectTrigger className="h-9 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal">
+          <SelectTrigger className="h-9 w-full min-w-0 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal">
             <SelectValue placeholder="Todos" />
           </SelectTrigger>
           <SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50">
@@ -689,7 +689,7 @@ function FilterBar({
         variant="ghost"
         size="sm"
         onClick={onClear}
-        className="ml-auto h-8 px-2 text-xs text-[#75827f] hover:text-[#e4684d]"
+        className="col-span-2 justify-self-end h-8 px-2 text-xs text-[#75827f] hover:text-[#e4684d] sm:ml-auto sm:col-auto"
       >
         Limpar
       </Button>
@@ -741,7 +741,7 @@ function RecordsFilterBar({
           Filtros
         </span>
       </div>
-      <label className="grid gap-1 text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
+      <label className="grid min-w-0 gap-1 text-[10px] sm:text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
         De
         <input
           type="date"
@@ -749,10 +749,10 @@ function RecordsFilterBar({
           max={DATE_MAX}
           value={from}
           onChange={e => setFrom(e.target.value)}
-          className="h-9 rounded-lg border border-[#dce5de] bg-[#fbfcfa] px-2 text-sm font-normal normal-case tracking-normal text-[#14283f]"
+          className="h-9 w-full min-w-0 rounded-lg border border-[#dce5de] bg-[#fbfcfa] px-1.5 sm:px-2 text-[11px] sm:text-sm font-normal normal-case tracking-normal text-[#14283f]"
         />
       </label>
-      <label className="grid gap-1 text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
+      <label className="grid min-w-0 gap-1 text-[10px] sm:text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
         Até
         <input
           type="date"
@@ -760,13 +760,13 @@ function RecordsFilterBar({
           max={DATE_MAX}
           value={to}
           onChange={e => setTo(e.target.value)}
-          className="h-9 rounded-lg border border-[#dce5de] bg-[#fbfcfa] px-2 text-sm font-normal normal-case tracking-normal text-[#14283f]"
+          className="h-9 w-full min-w-0 rounded-lg border border-[#dce5de] bg-[#fbfcfa] px-1.5 sm:px-2 text-[11px] sm:text-sm font-normal normal-case tracking-normal text-[#14283f]"
         />
       </label>
       <label className="grid gap-1 min-w-[170px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
         Veículo
         <Select value={vehicle} onValueChange={setVehicle}>
-          <SelectTrigger className="h-9 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal">
+          <SelectTrigger className="h-9 w-full min-w-0 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal">
             <SelectValue placeholder="Todos" />
           </SelectTrigger>
           <SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50">
@@ -782,7 +782,7 @@ function RecordsFilterBar({
       <label className="grid gap-1 min-w-[210px] text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
         Evento
         <Select value={event} onValueChange={setEvent}>
-          <SelectTrigger className="h-9 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal">
+          <SelectTrigger className="h-9 w-full min-w-0 bg-[#fbfcfa] border-[#dce5de] text-sm font-normal normal-case tracking-normal">
             <SelectValue placeholder="Todos" />
           </SelectTrigger>
           <SelectContent className="bg-white text-[#14283f] border-[#dce5de] shadow-xl z-50">
@@ -915,6 +915,10 @@ export default function Home() {
   const [tripSearch, setTripSearch] = useState("");
   const [tripView, setTripView] = useState<"table" | "cards">("table");
   const [tripSort, setTripSort] = useState<SortState>({
+    key: "tripDate",
+    direction: "desc",
+  });
+  const [vehicleTripSort, setVehicleTripSort] = useState<SortState>({
     key: "tripDate",
     direction: "desc",
   });
@@ -1161,14 +1165,27 @@ export default function Home() {
     : user?.role === "diretor"
       ? (["user", "coordenador"] as const)
       : (["user"] as const);
-  const selectedVehicleTrips = selectedVehicle
-    ? vehicleFilteredTrips
-        .filter(t => t.vehiclePlate === selectedVehicle.plate)
-        .sort(
-          (a, b) =>
-            new Date(b.tripDate).getTime() - new Date(a.tripDate).getTime()
+  const selectedVehicleTrips = useMemo(() => {
+    if (!selectedVehicle) return [];
+    return vehicleFilteredTrips
+      .filter(t => t.vehiclePlate === selectedVehicle.plate)
+      .sort((a, b) =>
+        compareSortValues(
+          a[vehicleTripSort.key as keyof Trip],
+          b[vehicleTripSort.key as keyof Trip],
+          vehicleTripSort.direction
         )
-    : [];
+      );
+  }, [selectedVehicle, vehicleFilteredTrips, vehicleTripSort]);
+  const latestSelectedVehicleTrip = useMemo(() => {
+    if (!selectedVehicle) return undefined;
+    return vehicleFilteredTrips
+      .filter(t => t.vehiclePlate === selectedVehicle.plate)
+      .sort(
+        (a, b) =>
+          new Date(b.tripDate).getTime() - new Date(a.tripDate).getTime()
+      )[0];
+  }, [selectedVehicle, vehicleFilteredTrips]);
   const selectedVehicleRecords = selectedVehicle
     ? vehicleFilteredRecords
         .filter(r => r.vehiclePlate === selectedVehicle.plate)
@@ -1298,16 +1315,16 @@ export default function Home() {
               AGENDA DRE
             </a>
           </div>
-          <nav className="order-3 flex w-full max-w-full basis-full min-w-0 items-center gap-0.5 overflow-x-auto rounded-xl bg-white/70 p-1 border border-[#e1e8e2] scrollbar-none lg:order-2 lg:flex-1 lg:basis-auto lg:justify-center lg:overflow-visible">
+          <nav className="order-3 flex w-full max-w-full basis-full min-w-0 items-center justify-center gap-1 overflow-visible rounded-xl bg-white/70 p-1 border border-[#e1e8e2] scrollbar-none lg:order-2 lg:flex-1 lg:basis-auto lg:gap-0.5">
             {tabs.map(item => (
               <button
                 key={item.id}
                 onClick={() => setTab(item.id)}
                 aria-label={item.label}
                 title={item.label}
-                className={`flex shrink-0 items-center justify-center gap-1 rounded-lg px-2 py-2 text-[13px] transition-all ${tab === item.id ? "bg-[#14283f] text-white shadow-sm" : "text-[#61716d] hover:text-[#14283f] hover:bg-[#eef3ef]"}`}
+                className={`flex min-w-0 flex-1 items-center justify-center gap-1 rounded-lg px-1.5 py-2 text-[13px] transition-all lg:flex-none lg:px-2 ${tab === item.id ? "bg-[#14283f] text-white shadow-sm" : "text-[#61716d] hover:text-[#14283f] hover:bg-[#eef3ef]"}`}
               >
-                <item.icon className="h-4 w-4" />
+                <item.icon className="h-5 w-5 shrink-0 lg:h-4 lg:w-4" />
                 <span className="hidden lg:inline">{item.label}</span>
               </button>
             ))}
@@ -2441,7 +2458,7 @@ export default function Home() {
                 label="Último registro"
                 value={formatDate(
                   selectedVehicleRecords[0]?.recordedAt ||
-                    selectedVehicleTrips[0]?.tripDate
+                    latestSelectedVehicleTrip?.tripDate
                 )}
                 detail="nas duas fontes"
                 icon={CalendarDays}
@@ -2458,16 +2475,46 @@ export default function Home() {
                 <table className="w-full text-left">
                   <thead className="bg-[#f7f9f6] border-y border-[#e5ebe5]">
                     <tr>
-                      {["Data", "Aba", "Motorista", "Destino", "Ação"].map(
-                        head => (
-                          <th
-                            key={head}
-                            className="px-4 py-3 text-[10px] uppercase tracking-[0.12em] text-[#75827f] font-bold"
-                          >
-                            {head}
-                          </th>
-                        )
-                      )}
+                      <SortHeader
+                        label="Data"
+                        sortKey="tripDate"
+                        sort={vehicleTripSort}
+                        onSort={key =>
+                          setVehicleTripSort(current => nextSort(current, key))
+                        }
+                      />
+                      <SortHeader
+                        label="Aba"
+                        sortKey="sourceSheet"
+                        sort={vehicleTripSort}
+                        onSort={key =>
+                          setVehicleTripSort(current => nextSort(current, key))
+                        }
+                      />
+                      <SortHeader
+                        label="Motorista"
+                        sortKey="driverName"
+                        sort={vehicleTripSort}
+                        onSort={key =>
+                          setVehicleTripSort(current => nextSort(current, key))
+                        }
+                      />
+                      <SortHeader
+                        label="Destino"
+                        sortKey="destination"
+                        sort={vehicleTripSort}
+                        onSort={key =>
+                          setVehicleTripSort(current => nextSort(current, key))
+                        }
+                      />
+                      <SortHeader
+                        label="Ação"
+                        sortKey="purpose"
+                        sort={vehicleTripSort}
+                        onSort={key =>
+                          setVehicleTripSort(current => nextSort(current, key))
+                        }
+                      />
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#edf1ed]">
