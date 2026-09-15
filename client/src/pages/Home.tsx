@@ -589,15 +589,15 @@ function FilterBar({
     ) as string[]
   ) as string[];
   return (
-    <div className="no-print grid gap-3 rounded-2xl bg-white border border-[#e3e9e4] p-3 sm:p-4 shadow-[0_5px_18px_rgba(20,40,63,0.04)]">
-      <div className="grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] items-end gap-2 sm:flex sm:flex-wrap sm:gap-3">
+    <div className="no-print grid gap-3 rounded-2xl bg-white border border-[#e3e9e4] p-3 sm:p-4 shadow-[0_5px_18px_rgba(20,40,63,0.04)] lg:flex lg:flex-nowrap lg:items-end">
+      <div className="grid grid-cols-[auto_minmax(0,1fr)_minmax(0,1fr)] items-end gap-2 sm:flex sm:flex-wrap sm:gap-3 lg:contents">
       <div className="flex min-w-0 items-center gap-1.5 text-[#4f8f77] self-center mr-1 whitespace-nowrap">
         <Filter className="h-4 w-4" />
         <span className="text-xs font-semibold uppercase tracking-[0.12em]">
           Filtros
         </span>
       </div>
-      <label className="grid min-w-0 gap-1 text-[10px] sm:text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
+      <label className="grid min-w-0 gap-1 text-[10px] sm:text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em] lg:min-w-[140px]">
         De
         <input
           type="date"
@@ -608,7 +608,7 @@ function FilterBar({
           className="h-9 w-full min-w-0 rounded-lg border border-[#dce5de] bg-[#fbfcfa] px-1.5 sm:px-2 text-[11px] sm:text-sm font-normal normal-case tracking-normal text-[#14283f]"
         />
       </label>
-      <label className="grid min-w-0 gap-1 text-[10px] sm:text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em]">
+      <label className="grid min-w-0 gap-1 text-[10px] sm:text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em] lg:min-w-[140px]">
         Até
         <input
           type="date"
@@ -620,7 +620,7 @@ function FilterBar({
         />
       </label>
       </div>
-      <div className="grid grid-cols-2 items-end gap-2 sm:flex sm:flex-wrap sm:gap-3">
+      <div className="grid grid-cols-2 items-end gap-2 sm:flex sm:flex-wrap sm:gap-3 lg:contents">
       <label className="grid min-w-0 gap-1 text-[10px] sm:text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em] sm:min-w-[145px]">
         Veículo
         <Select value={vehicle} onValueChange={setVehicle}>
@@ -654,7 +654,7 @@ function FilterBar({
         </Select>
       </label>
       </div>
-      <div className="grid grid-cols-2 items-end gap-2 sm:flex sm:flex-wrap sm:justify-between sm:gap-3">
+      <div className="grid grid-cols-2 items-end gap-2 sm:flex sm:flex-wrap sm:justify-between sm:gap-3 lg:contents">
       <label className="grid min-w-0 gap-1 text-[10px] sm:text-[11px] text-[#75827f] font-semibold uppercase tracking-[0.08em] sm:min-w-[145px]">
         Status
         <Select value={status} onValueChange={setStatus}>
@@ -689,7 +689,7 @@ function FilterBar({
         variant="ghost"
         size="sm"
         onClick={onClear}
-        className="col-span-2 justify-self-end h-8 px-2 text-xs text-[#75827f] hover:text-[#e4684d] sm:ml-auto sm:col-auto"
+        className="col-span-2 justify-self-end h-8 px-2 text-xs text-[#75827f] hover:text-[#e4684d] sm:ml-auto sm:col-auto lg:ml-auto"
       >
         Limpar
       </Button>
