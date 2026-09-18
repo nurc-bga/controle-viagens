@@ -6,7 +6,7 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { createPasswordSession, hashPassword, PASSWORD_SESSION_COOKIE, verifyPassword } from "./passwordAuth";
 import { systemRouter } from "./_core/systemRouter";
 import { adminProcedure, protectedProcedure, publicProcedure, router } from "./_core/trpc";
-import { deleteUserById, getSystemAccess, getUserByEmail, getUserById, getVisitorAccess, importTrips, listDepartureArrivalRecords, listTrips, listUsers, listVehicles, markUserSignedIn, setSystemAccess, setUserActive, setUserPassword, setVisitorAccess, updateUserById, upsertUser } from "./db";
+import { deleteUserById, getFooterSettings, getSystemAccess, getUserByEmail, getUserById, getVisitorAccess, importTrips, listDepartureArrivalRecords, listTrips, listUsers, listVehicles, markUserSignedIn, setFooterSettings, setSystemAccess, setUserActive, setUserPassword, setVisitorAccess, updateUserById, upsertUser } from "./db";
 import type { InsertTrip } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
@@ -89,6 +89,12 @@ export const appRouter = router({
     }),
     visitorAccess: publicProcedure.query(() => getVisitorAccess()),
     systemAccess: publicProcedure.query(() => getSystemAccess()),
+    footer: publicProcedure.query(() => getFooterSettings()),
+    updateFooter: adminProcedure.input(z.object({
+      line1: z.string().trim().min(1).max(255),
+      line2: z.string().trim().min(1).max(255),
+      line3: z.string().trim().min(1).max(255),
+    })).mutation(({ input }) => setFooterSettings(input)),
     setVisitorAccess: adminProcedure.input(z.object({ enabled: z.boolean() })).mutation(({ input }) => setVisitorAccess(input.enabled)),
     setSystemAccess: adminProcedure.input(z.object({ enabled: z.boolean() })).mutation(({ input }) => setSystemAccess(input.enabled)),
     logout: publicProcedure.mutation(({ ctx }) => {

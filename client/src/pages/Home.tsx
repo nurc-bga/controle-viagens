@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { startLogin } from "@/const";
 import { trpc } from "@/lib/trpc";
@@ -51,6 +51,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -833,6 +834,7 @@ export default function Home() {
   const { user, loading, logout } = useAuth();
   const visitorAccessQuery = trpc.auth.visitorAccess.useQuery();
   const systemAccessQuery = trpc.auth.systemAccess.useQuery();
+  const footerQuery = trpc.auth.footer.useQuery();
   const canViewData =
     (Boolean(user) || visitorAccessQuery.data === true) &&
     (systemAccessQuery.data === true || user?.role === "admin");
@@ -863,6 +865,15 @@ export default function Home() {
       toast.success(
         enabled ? "Sistema ativado." : "Sistema colocado em manutenção."
       );
+    },
+    onError: error => toast.error(error.message),
+  });
+  const footerMutation = trpc.auth.updateFooter.useMutation({
+    onSuccess: settings => {
+      footerQuery.refetch();
+      setFooterDraft(settings);
+      setFooterDialog(false);
+      toast.success("Rodapé atualizado.");
     },
     onError: error => toast.error(error.message),
   });
@@ -943,6 +954,16 @@ export default function Home() {
   const [memberName, setMemberName] = useState("");
   const [memberEmail, setMemberEmail] = useState("");
   const [memberRole, setMemberRole] = useState<"user" | "coordenador" | "diretor" | "admin">("user");
+  const [footerDialog, setFooterDialog] = useState(false);
+  const [footerDraft, setFooterDraft] = useState({
+    line1: "Desenvolvido por Ademir Maciel. © Todos os direitos reservados.",
+    line2: "Contato: (66)9 9930-7039. @ademirmaciel01",
+    line3: "Diretoria Regional de Educação de Barra do Garças - MT",
+  });
+
+  useEffect(() => {
+    if (footerQuery.data) setFooterDraft(footerQuery.data);
+  }, [footerQuery.data]);
 
   const rawTrips = (tripsQuery.data ?? []) as Trip[];
   const allTrips = rawTrips;
@@ -2655,9 +2676,87 @@ export default function Home() {
           )}
         </DialogContent>
       </Dialog>
-      <footer className="no-print max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-8 text-xs text-[#9aa6a2] flex flex-wrap justify-between gap-2">
-        <span>Histórico de Viagens · dados em nuvem</span>
-        <span>Período de análise: maio/2022 a agosto/2026</span>
+      <Dialog open={footerDialog} onOpenChange={setFooterDialog}>
+        <DialogContent className="border-[#dce5de] bg-[#f5f6f2] sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-display text-2xl font-bold text-[#14283f]">
+              Editar rodapé
+            </DialogTitle>
+            <p className="text-sm text-[#75827f]">
+              Esta edição está disponível somente para administradores.
+            </p>
+          </DialogHeader>
+          <div className="space-y-4">
+            <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#75827f]">
+              Primeira linha
+              <Textarea
+                value={footerDraft.line1}
+                onChange={event => setFooterDraft(current => ({ ...current, line1: event.target.value }))}
+                maxLength={255}
+                rows={2}
+                className="resize-none bg-white text-sm font-normal normal-case tracking-normal text-[#14283f]"
+              />
+            </label>
+            <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#75827f]">
+              Segunda linha
+              <Textarea
+                value={footerDraft.line2}
+                onChange={event => setFooterDraft(current => ({ ...current, line2: event.target.value }))}
+                maxLength={255}
+                rows={2}
+                className="resize-none bg-white text-sm font-normal normal-case tracking-normal text-[#14283f]"
+              />
+            </label>
+            <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#75827f]">
+              Terceira linha
+              <Textarea
+                value={footerDraft.line3}
+                onChange={event => setFooterDraft(current => ({ ...current, line3: event.target.value }))}
+                maxLength={255}
+                rows={2}
+                className="resize-none bg-white text-sm font-normal normal-case tracking-normal text-[#14283f]"
+              />
+            </label>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="ghost" onClick={() => setFooterDialog(false)}>
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                disabled={footerMutation.isPending || Object.values(footerDraft).some(value => !value.trim())}
+                onClick={() => footerMutation.mutate(footerDraft)}
+                className="bg-[#14283f] text-white hover:bg-[#244537]"
+              >
+                {footerMutation.isPending ? "Salvando…" : "Salvar alterações"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <footer className="no-print max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-8 text-xs text-[#9aa6a2]">
+        <div className="flex flex-col gap-2 border-t border-[#e1e8e2] pt-6 text-center sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:text-left">
+          <div className="space-y-1">
+            <p>{footerDraft.line1}</p>
+            <p>{footerDraft.line2}</p>
+            <p>{footerDraft.line3}</p>
+          </div>
+          <div className="flex flex-col items-center gap-2 sm:items-end">
+            <p>Histórico de Viagens · dados em nuvem</p>
+            <p>Período de análise: maio/2022 a agosto/2026</p>
+            {user?.role === "admin" && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setFooterDialog(true)}
+                className="no-print h-8 gap-1.5 border-[#cfe0d4] bg-white text-[#317154] hover:bg-[#e8f3ec]"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+                Editar Rodapé
+              </Button>
+            )}
+          </div>
+        </div>
       </footer>
     </div>
   );

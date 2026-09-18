@@ -1,4 +1,4 @@
-import { desc, eq, not } from "drizzle-orm";
+import { desc, eq, inArray, not } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { appSettings, departureArrivalRecords, InsertTrip, InsertUser, trips, users, vehicles } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -82,6 +82,41 @@ export async function getSystemAccess() {
   if (!db) return true;
   const result = await db.select().from(appSettings).where(eq(appSettings.key, "system_access")).limit(1);
   return result[0]?.value !== "inactive";
+}
+
+export const DEFAULT_FOOTER_SETTINGS = {
+  line1: "Desenvolvido por Ademir Maciel. © Todos os direitos reservados.",
+  line2: "Contato: (66)9 9930-7039. @ademirmaciel01",
+  line3: "Diretoria Regional de Educação de Barra do Garças - MT",
+};
+
+export type FooterSettings = typeof DEFAULT_FOOTER_SETTINGS;
+
+export async function getFooterSettings(): Promise<FooterSettings> {
+  const db = await getDb();
+  if (!db) return DEFAULT_FOOTER_SETTINGS;
+  const rows = await db.select().from(appSettings).where(
+    inArray(appSettings.key, ["footer_line1", "footer_line2", "footer_line3"])
+  );
+  const settings = new Map(rows.map(row => [row.key, row.value]));
+  return {
+    line1: settings.get("footer_line1") || DEFAULT_FOOTER_SETTINGS.line1,
+    line2: settings.get("footer_line2") || DEFAULT_FOOTER_SETTINGS.line2,
+    line3: settings.get("footer_line3") || DEFAULT_FOOTER_SETTINGS.line3,
+  };
+}
+
+export async function setFooterSettings(settings: FooterSettings) {
+  const db = await getDb();
+  if (!db) throw new Error("Banco de dados indisponível");
+  for (const [key, value] of Object.entries({
+    footer_line1: settings.line1,
+    footer_line2: settings.line2,
+    footer_line3: settings.line3,
+  })) {
+    await db.insert(appSettings).values({ key, value }).onDuplicateKeyUpdate({ set: { value } });
+  }
+  return settings;
 }
 
 export async function setSystemAccess(enabled: boolean) {
